@@ -22,8 +22,13 @@ app.use(express.static('./overlays'));
 
 io.on('connection', (socket) => {
   console.log('a user connected');
+  console.log(socket.handshake.query.user);
 
   //dbManager.init(io);
+
+  socket.on('message', function(msg) {
+    console.log('message', msg);
+  });
 
   socket.on('error', function(error) {
     console.log('error', error);
@@ -46,16 +51,24 @@ require('./js/streamElementsAlert/streamElementsAlertHandler');
 require('./js/channelPoint/channelPointHandler');
 
 // OnChannelPoint "Recompense 2"
-var parserTW = controller.getParser('ChannelPoint');
-if (parserTW) {
-  parserTW.addTriggerData('OnChannelPoint', [
+var parser = controller.getParser('ChannelPoint');
+if (parser) {
+  parser.addTriggerData('OnChannelPoint', [
     "OnChannelPoint",
     "Recompense 2"
   ], controller.triggerCount);
   controller.triggerData[controller.triggerCount] = [
-    ["Led", "0"],
-    ["delay", "5"],
-    ["Led", "1"],
+    ["FUNCTION", (msg) => {
+      console.log("Recompense 2", msg.data);
+
+      // var payload = {
+      //   detail: {
+      //     listener: 'se-donation-latest',
+      //     event: msg.data
+      //   }
+      // }
+      // io.sockets.emit('onEvent', payload);
+    }]
   ];
 
   controller.triggerCount = controller.triggerCount + 1;
@@ -68,13 +81,13 @@ if (parserSE) {
     "OnSEDonation"
   ], controller.triggerCount);
   controller.triggerData[controller.triggerCount] = [
-    ["LOG", "ok"]
+    ["FUNCTION", (msg) => {
+      console.log(msg);
+    }]
   ];
 
   controller.triggerCount = controller.triggerCount + 1;
 }
 
 controller.doneParsing();
-setTimeout(function() {
-  controller.runInit();
-}, 1000);
+controller.runInit();

@@ -170,17 +170,19 @@ class Controller {
           run_data.push(data[j])
 
           // Find and replace all matches
-          var result = run_data[j].match(triggerRegex);
-          while (result) {
-            result.forEach(match => {
-              if (match.charAt(0) === '[') {
-                var replacement = JSON.stringify(triggerParams[match.substring(1, match.length - 1)]);
-                run_data[j] = run_data[j].replace(match, replacement);
-              } else {
-                run_data[j] = run_data[j].replace(match, triggerParams[match.substring(1, match.length - 1)]);
-              }
-            });
-            result = run_data[j].match(triggerRegex);
+          if (typeof run_data[j] != "function") {
+            var result = run_data[j].match(triggerRegex);
+            while (result) {
+              result.forEach(match => {
+                if (match.charAt(0) === '[') {
+                  var replacement = JSON.stringify(triggerParams[match.substring(1, match.length - 1)]);
+                  run_data[j] = run_data[j].replace(match, replacement);
+                } else {
+                  run_data[j] = run_data[j].replace(match, triggerParams[match.substring(1, match.length - 1)]);
+                }
+              });
+              result = run_data[j].match(triggerRegex);
+            }
           }
         }
       } else {
@@ -210,7 +212,7 @@ class Controller {
    * Perform the action content.
    * @param {array} data action to perform
    */
-  async runTrigger(data) {
+  async runTrigger(data, msg) {
     var parserName = data[0].toLowerCase();
     if (parserName === 'delay') {
       // Custom delay handler
@@ -255,40 +257,10 @@ class Controller {
       var message = data.slice(1).join(' ');
       console.log(message);
     }
-    else if (parserName === 'led') {
-      var message = data.slice(1).join(' ');
-      console.log(message);
-
-      // var request = new XMLHttpRequest();
-      //
-      // request.open('GET', `http://blynk-cloud.com/S5a4w1XiydUgznkggcF7YO-SIzzuQOvT/update/D6?value=${message == 1 ? 1 : 0}`);
-      //
-      // request.onreadystatechange = function () {
-      //   if (this.readyState === 4) {
-      //     console.log('Status:', this.status);
-      //     console.log('Headers:', this.getAllResponseHeaders());
-      //     console.log('Body:', this.responseText);
-      //   }
-      // };
-      //
-      // request.send();
-    }
-    else if (parserName === 'rgb') {
-      var message = data.slice(1);
-
-      // var request = new XMLHttpRequest();
-      //
-      // request.open('GET', `http://blynk-cloud.com/S5a4w1XiydUgznkggcF7YO-SIzzuQOvT/update/V2?value=${message[0]}&value=${message[1]}&value=${message[2]}`);
-      //
-      // request.onreadystatechange = function () {
-      //   if (this.readyState === 4) {
-      //     console.log('Status:', this.status);
-      //     console.log('Headers:', this.getAllResponseHeaders());
-      //     console.log('Body:', this.responseText);
-      //   }
-      // };
-      //
-      // request.send();
+    else if (parserName === 'function') {
+      if (typeof data[1] === "function") {
+        data[1](msg);
+      }
     }
     else {
       // Get parser and run trigger content
