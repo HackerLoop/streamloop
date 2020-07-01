@@ -11,10 +11,16 @@ const PORT = process.env["PORT"] || 8080;
 let ip = require('ip').address();
 
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/pages/index.html');
+  // dbManager.test();
+})
+
+app.get('/admin', (req, res) => {
+  res.sendFile(__dirname + '/pages/admin.html');
   // dbManager.test();
 })
 
@@ -24,10 +30,21 @@ io.on('connection', (socket) => {
   console.log('a user connected');
   console.log(socket.handshake.query.user);
 
-  //dbManager.init(io);
+  dbManager.init(io);
 
   socket.on('message', function(msg) {
     console.log('message', msg);
+  });
+
+  socket.on('getUsers', function() {
+    dbManager.getUsers()
+      .then(result => {
+        console.log(result);
+        socket.emit('users', result);
+      })
+      .catch(err => {
+        console.log(err);
+      });
   });
 
   socket.on('error', function(error) {
@@ -60,14 +77,22 @@ if (parser) {
   controller.triggerData[controller.triggerCount] = [
     ["FUNCTION", (msg) => {
       console.log("Recompense 2", msg.data);
+      var newEvent = {
+        listener: 'OnChannelPoint',
+        event: msg.data
+      }
+      dbManager.addEvent(newEvent);
 
-      // var payload = {
-      //   detail: {
-      //     listener: 'se-donation-latest',
-      //     event: msg.data
-      //   }
-      // }
-      // io.sockets.emit('onEvent', payload);
+      dbManager.getWidgetData("michel")
+        .then(data => {
+          data.count++;
+          if (data.count-data.offset >= data.goal && data.count <= data.max) {
+            data.offset = data.count;
+            // do something
+            // trigger pump
+          }
+          dbManager.updateWidgetData("michel", data);
+        });
     }]
   ];
 
@@ -83,6 +108,11 @@ if (parserSE) {
   controller.triggerData[controller.triggerCount] = [
     ["FUNCTION", (msg) => {
       console.log(msg);
+      var newEvent = {
+        listener: 'OnSEDonation',
+        event: msg
+      }
+      dbManager.addEvent(newEvent);
     }]
   ];
 

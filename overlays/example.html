@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My first Overlay</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <div id="app">
+    <div class="main-container">
+      <div class="meter">
+        <span id="bar" :style="{width: Math.min(100, percentage) + '%'}">
+        </span>
+        <div class="legend">
+          <span id="percent">{{parseFloat(percentage).toFixed(2)}}</span>%
+        </div>
+      </div>
+      <span class="goal">{{count}}/{{goal}}</span>
+    </div>
+    <h2 class="alert">Alert: {{alert}}</h2>
+  </div>
+</body>
+
+<script>
+let goal, fieldData;
+
+let botPoints = 0;
+let sessionData;
+
+var socket = io('', {query: "user=hackerloop"});
+var app = new Vue({
+  el: '#app',
+  data: {
+    percentage: 0,
+    goal: 0,
+    count: 0,
+    alert: ""
+  },
+  created () {
+    socket.on('EVENT', (obj) => {
+      console.log(obj);
+      if (obj.listener == "OnChannelPoint") {
+        this.alert = obj.event.data.redemption.user.display_name + " redemed " + obj.event.data.redemption.reward.title;
+        setTimeout(() => {
+          this.alert = "";
+        }, 5000);
+      }
+    });
+
+    socket.on('WIDGETS_DATA', (obj) => {
+      var data = obj.find(elem => {
+        return elem.name == "michel"
+      })
+      console.log(data);
+      this.goal = data.max;
+      this.count = data.count;
+      this.percentage = ((data.count/data.max) * 100).toFixed(2);
+    });
+  },
+
+  methods: {
+    send() {
+      socket.emit('message', {
+        message: "coucou"
+      });
+    }
+  }
+})
+</script>
+
+<style lang="scss" scoped>
+  * {
+    font-family: 'arial', sans-serif;
+  }
+  .meter {
+    width: 500px;
+    height: 50px;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index:-1;
+    background: #ddd;
+    border-radius: 5px;
+    padding: 0px;
+    overflow: hidden;
+  }
+
+  .meter > span {
+    display: block;
+    position: relative;
+    height: 100%;
+    border-radius: 0px;
+    background-color: blue;
+    overflow: hidden;
+  }
+  .legend{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    transform: translate(-50%,-50%);
+    font-size: 20px;
+    color: #000;
+    text-align:center;
+    font-weight:1200;
+  }
+
+  .goal {
+    position: absolute;
+    left: 520px;
+    top: 28px;
+  }
+
+  .alert {
+    position: absolute;
+    top: 50px;
+    left: 10px;
+  }
+</style>
+
+</html>
