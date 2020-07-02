@@ -47,12 +47,14 @@
             <th>name</th>
             <th>goal</th>
             <th>count</th>
+            <th>duration</th>
             <th>revealed</th>
           </tr>
           <tr>
             <td>{{widgetsData[1].name}}</td>
             <td><input type="number" v-model.number="widgetsData[1].goal"></td>
             <td><input type="number" v-model.number="widgetsData[1].count"></td>
+            <td><input type="number" v-model.number="widgetsData[1].duration"></td>
             <td>{{widgetsData[1].revealed}}</td>
           </tr>
         </table>

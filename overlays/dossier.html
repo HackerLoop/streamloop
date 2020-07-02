@@ -13,6 +13,13 @@
       <h3>last Event: "{{lastEvent.event.user}}" donate  {{lastEvent.event.amount.toLocaleString(undefined,{style: 'currency',currency:"EUR"})}}</h3>
       <p>{{lastEvent.event.message}}</p>
     </div>
+    <!-- <h2 class="alert">Alert: {{alertMessage}}</h2>
+    <img class="alertImg" v-bind:src="alertImg" /> -->
+
+    <br>
+    <div v-if="dossierImg">
+      <img class="dossierImg" v-bind:src="dossierImg" />
+    </div>
   </div>
 </body>
 
@@ -22,33 +29,45 @@ let goal, fieldData;
 let botPoints = 0;
 let sessionData;
 
+var timer;
+
 var socket = io('', {query: "user=hackerloop"});
 var app = new Vue({
   el: '#app',
   data: {
     goal: 0,
     count: 0,
+    duration: 0,
     alertMessage: "",
     alertImg: "",
-    events: {}
+    events: {},
+    dossierImg: ""
   },
   created () {
+    /*
     socket.on('EVENT', (obj) => {
       console.log(obj);
-      if (obj.listener == "OnChannelPoint") {
-        this.alertMessage = obj.event.data.redemption.user.display_name + " redemed " + obj.event.data.redemption.reward.title;
+      if (obj.listener == "OnSEDonation") {
+        this.alertMessage = obj.event.user + " donate " + obj.event.amount.toLocaleString(undefined,{style: 'currency',currency:"EUR"});
 
-        axios.get('https://decapi.me/twitch/avatar/'+obj.event.data.redemption.user.display_name)
+        axios.get('https://decapi.me/twitch/avatar/'+obj.event.user)
         .then((response) => {
           console.log(response.data);
-          this.alertImg = response.data;
-          // setTimeout(() => {
-          //   this.alertImg = "";
-          //   this.alertMessage = "";
-          // }, 10000);
+          if(response.data.startsWith('http')) {
+            this.alertImg = response.data;
+            // setTimeout(() => {
+            //   this.alertImg = "";
+            //   this.alertMessage = "";
+            // }, 10000);
+          }
+          else {
+            console.log(response);
+            this.alertImg = 'https://static-cdn.jtvnw.net/jtv-static/404_preview-300x300.png';
+          }
         })
       }
     });
+    */
 
     socket.on('WIDGETS_DATA', (obj) => {
       var data = obj.find(elem => {
@@ -57,6 +76,7 @@ var app = new Vue({
       console.log(data);
       this.goal = data.goal;
       this.count = data.count;
+      this.duration = data.duration;
     });
 
     socket.on('EVENT_LIST', (obj) => {
@@ -65,6 +85,15 @@ var app = new Vue({
       })
       console.log(data);
       this.events = data;
+    });
+
+    socket.on('EVENT_DOSSIER', (obj) => {
+      console.log(obj);
+      this.dossierImg = obj.url;
+      clearTimeout(timer);
+      var timer = setTimeout(() => {
+        this.dossierImg = "";
+      }, this.duration);
     });
   },
 
@@ -85,6 +114,15 @@ var app = new Vue({
     font-family: 'arial', sans-serif;
   }
 
+  .alertImg {
+    width: 100px;
+    height: auto;
+  }
+
+  .dossierImg {
+    width: 200px;
+    height: auto;
+  }
 </style>
 
 </html>

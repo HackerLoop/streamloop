@@ -117,7 +117,8 @@ if (parserSE) {
           if (data.count >= data.goal) {
             data.count = data.count - data.goal;
 
-            console.log("Reaveal Image Dossier !");
+            console.log("Reveal Image Dossier !");
+            revealDossier(data);
           }
           dbManager.updateWidgetData(data);
         });
@@ -129,3 +130,50 @@ if (parserSE) {
 
 controller.doneParsing();
 controller.runInit();
+
+const cloudinary = require('cloudinary').v2;
+
+cloudinary.config({
+  cloud_name: "dcr72h6g0",
+  api_key: "378243186252451",
+  api_secret: "vCuEp73WpSC_ydasMRYhFKcp_pw"
+});
+
+function revealDossier(data) {
+  cloudinary.api.resources({
+      type: 'upload',
+      prefix: 'test/'
+    },
+    function(error, result) {
+      if (error) {
+        console.log(error);
+      }
+      if (result) {
+        console.log(result);
+        var remaining = result.resources.filter(elem => {
+          return !data.revealed.includes(elem.asset_id);
+        });
+        if (remaining.length <= 0) {
+          remaining = result.resources;
+          data.revealed = [];
+          console.log("no more 'dossier'! restart");
+        }
+
+        var item = remaining[Math.floor(Math.random() * remaining.length)];
+
+        if (item) {
+          console.log("item", item);
+
+          io.sockets.emit("EVENT_DOSSIER", item);
+
+          data.revealed.push(item.asset_id);
+          dbManager.updateWidgetData(data);
+        }
+        else {
+          console.log("no random item found in remaining dossier !");
+        }
+      }
+    }
+  );
+
+}
