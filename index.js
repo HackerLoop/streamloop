@@ -28,7 +28,7 @@ app.use(express.static('./overlays'));
 
 io.on('connection', (socket) => {
   console.log('a user connected');
-  console.log(socket.handshake.query.user);
+  // console.log(socket.handshake.query.user);
 
   dbManager.init(io);
 
@@ -36,15 +36,8 @@ io.on('connection', (socket) => {
     console.log('message', msg);
   });
 
-  socket.on('getUsers', function() {
-    dbManager.getUsers()
-      .then(result => {
-        console.log(result);
-        socket.emit('users', result);
-      })
-      .catch(err => {
-        console.log(err);
-      });
+  socket.on('UPDATE_WIDGET', function(obj) {
+    dbManager.updateWidgetData(obj);
   });
 
   socket.on('error', function(error) {
@@ -86,12 +79,14 @@ if (parser) {
       dbManager.getWidgetData("michel")
         .then(data => {
           data.count++;
+          if (data.count > data.max) { return false; };
           if (data.count-data.offset >= data.goal && data.count <= data.max) {
             data.offset = data.count;
             // do something
             // trigger pump
+            console.log("trigger Air Pump !");
           }
-          dbManager.updateWidgetData("michel", data);
+          dbManager.updateWidgetData(data);
         });
     }]
   ];
@@ -113,6 +108,19 @@ if (parserSE) {
         event: msg
       }
       dbManager.addEvent(newEvent);
+
+      dbManager.getWidgetData("dossier")
+        .then(data => {
+          console.log(data);
+          console.log(data.count, msg.amount);
+          data.count = data.count + msg.amount;
+          if (data.count >= data.goal) {
+            data.count = data.count - data.goal;
+
+            console.log("Reaveal Image Dossier !");
+          }
+          dbManager.updateWidgetData(data);
+        });
     }]
   ];
 

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.0/css/bulma.min.css">
+</head>
+<body>
+  <div id="app">
+    <div class="users container" v-if="widgetsData[0]">
+      <h1><a target="_blank" href="/example.html">Overlay {{widgetsData[0].name}}</a></h1>
+      <br>
+      <form v-on:submit.prevent="updateWidget(0)">
+        <table class="table is-bordered is-striped">
+          <tr>
+            <th>name</th>
+            <th>step goal</th>
+            <th>max</th>
+            <th>count</th>
+            <th>offset</th>
+            <th>duration (s)</th>
+          </tr>
+          <tr>
+            <td>{{widgetsData[0].name}}</td>
+            <td><input type="number" v-model="widgetsData[0].goal"></td>
+            <td><input type="number" v-model="widgetsData[0].max"></td>
+            <td><input type="number" v-model="widgetsData[0].count"></td>
+            <td><input type="number" v-model="widgetsData[0].offset"></td>
+            <td><input type="number" v-model="widgetsData[0].duration"></td>
+          </tr>
+        </table>
+        <button type="submit">Update Widget</button>
+        <button type="button" @click="resetMichelCounter(0)">Reset counter</button>
+      </form>
+    </div>
+    <br>
+    <div class="users container" v-if="widgetsData[1]">
+      <h1><a target="_blank" href="/dossier.html">Overlay {{widgetsData[1].name}}</a></h1>
+      <br>
+      <form v-on:submit.prevent="updateWidget(1)">
+        <table class="table is-bordered is-striped">
+          <tr>
+            <th>name</th>
+            <th>goal</th>
+            <th>count</th>
+            <th>revealed</th>
+          </tr>
+          <tr>
+            <td>{{widgetsData[1].name}}</td>
+            <td><input type="number" v-model="widgetsData[1].goal"></td>
+            <td><input type="number" v-model="widgetsData[1].count"></td>
+            <td>{{widgetsData[1].revealed}}</td>
+          </tr>
+        </table>
+        <button type="submit">Update Widget</button>
+        <button type="button" @click="resetDossierCounter(1)">Reset counter</button>
+        <button type="button" @click="resetDossierRevealed(1)">Reset revealed</button>
+      </form>
+    </div>
+  </div>
+</body>
+
+<script>
+  var socket = io();
+  var app = new Vue({
+    el: '#app',
+    data: {
+      message: 'Hello Vue!',
+      widgetsData: []
+    },
+    created () {
+      window.onbeforeunload = () => {
+        socket.emit('leave', this.username);
+      }
+
+      socket.on('WIDGETS_DATA', (obj) => {
+        this.widgetsData = obj;
+        console.log(obj);
+      });
+    },
+    mounted () {
+
+    },
+
+    methods: {
+      send() {
+        socket.emit('message', {
+          message: "coucou"
+        });
+      },
+
+      updateWidget(index) {
+        console.log(this.widgetsData[index]);
+        socket.emit('UPDATE_WIDGET', this.widgetsData[index]);
+      },
+
+      resetMichelCounter(index) {
+        this.widgetsData[index].count = 0;
+        this.widgetsData[index].offset = 0;
+        socket.emit('UPDATE_WIDGET', this.widgetsData[index]);
+      },
+
+      resetDossierCounter(index) {
+        this.widgetsData[index].count = 0;
+        socket.emit('UPDATE_WIDGET', this.widgetsData[index]);
+      },
+
+      resetDossierRevealed(index) {
+        this.widgetsData[index].revealed = [];
+        socket.emit('UPDATE_WIDGET', this.widgetsData[index]);
+      }
+    }
+  })
+</script>
+
+<style lang="scss" scoped>
+  #app {
+    padding: 20px;
+  }
+  .users .table td {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+</style>
+
+</html>

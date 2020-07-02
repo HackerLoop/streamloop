@@ -76,9 +76,13 @@ const getWidgetData = async (widgetName) => {
   return data;
 }
 
-const updateWidgetData = async (widgetName, data) => {
+const updateWidgetData = async (data) => {
+  // console.log("updateWidgetData", data);
+  if (data._id) {
+    delete data._id;
+  }
   try {
-    await Widgets.updateOne({name: widgetName}, {$set: data});
+    await Widgets.updateOne({name: data.name}, {$set: data});
     let widgetsData = await Widgets.find().toArray();
     socketio.emit("WIDGETS_DATA", widgetsData);
   } catch(err) {
