@@ -26,11 +26,11 @@
           </tr>
           <tr>
             <td>{{widgetsData[0].name}}</td>
-            <td><input type="number" v-model="widgetsData[0].goal"></td>
-            <td><input type="number" v-model="widgetsData[0].max"></td>
-            <td><input type="number" v-model="widgetsData[0].count"></td>
-            <td><input type="number" v-model="widgetsData[0].offset"></td>
-            <td><input type="number" v-model="widgetsData[0].duration"></td>
+            <td><input type="number" v-model.number="widgetsData[0].goal"></td>
+            <td><input type="number" v-model.number="widgetsData[0].max"></td>
+            <td><input type="number" v-model.number="widgetsData[0].count"></td>
+            <td><input type="number" v-model.number="widgetsData[0].offset"></td>
+            <td><input type="number" v-model.number="widgetsData[0].duration"></td>
           </tr>
         </table>
         <button type="submit">Update Widget</button>
@@ -51,8 +51,8 @@
           </tr>
           <tr>
             <td>{{widgetsData[1].name}}</td>
-            <td><input type="number" v-model="widgetsData[1].goal"></td>
-            <td><input type="number" v-model="widgetsData[1].count"></td>
+            <td><input type="number" v-model.number="widgetsData[1].goal"></td>
+            <td><input type="number" v-model.number="widgetsData[1].count"></td>
             <td>{{widgetsData[1].revealed}}</td>
           </tr>
         </table>
