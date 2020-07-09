@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My first Overlay</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<body>
+  <div id="app">
+    <div class="main-container">
+      <div class="alert" v-if="showAlert">
+        <img v-bind:src="alertImg" width="300" height="300" alt="">
+        <h2>Serge go brrrrrrrr !!</h2>
+      </div>
+    </div>
+  </div>
+</body>
+
+<script>
+var socket = io('', {query: "user=hackerloop"});
+var app = new Vue({
+  el: '#app',
+  data: {
+    showAlert: false,
+    timer: null,
+    alertImg: ''
+  },
+  created () {
+
+    socket.on('EVENT_ALERT_SERGE', (obj) => {
+      this.showAlert = true;
+      this.alertImg = './assets/PunchingBallFULL.gif';
+      this.timer = setTimeout(() => {
+        this.showAlert = false;
+        this.alertImg = "";
+      }, 2400);
+    });
+  },
+
+  computed: {
+    lastEvent() {
+      return this.events.slice(-1)[0]
+    }
+  },
+
+  methods: {
+    send() {
+      socket.emit('message', {
+        message: "coucou"
+      });
+    }
+  }
+})
+</script>
+
+<style lang="scss" scoped>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat&display=swap');
+
+  html {
+    font-family: 'Montserrat', sans-serif;
+  }
+
+  *, *:before, *:after {
+    box-sizing: border-box;
+  }
+
+  .alert {
+    position: absolute;
+    top: 50px;
+    left: 10px;
+    transform: scale(1);
+    text-align: center;
+    font-weight: 600;
+  }
+</style>
+
+</html>

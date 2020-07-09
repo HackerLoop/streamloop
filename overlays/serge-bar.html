@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My first Overlay</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<body>
+  <div id="app">
+    <div class="main-container">
+      <img class="title" src="./assets/overlay-serge-title.png" width="502" height="120" alt="">
+      <div class="meter">
+        <span id="bar" :style="{width: Math.min(100, percentage) + '%'}">
+        </span>
+        <div class="legend">
+          <span id="percent">{{parseFloat(percentage).toFixed(2)}}</span>%
+        </div>
+      </div>
+      <!-- <span class="goal">{{count}}/{{max}}</span> -->
+    </div>
+  </div>
+</body>
+
+<script>
+var socket = io('', {query: "user=hackerloop"});
+var app = new Vue({
+  el: '#app',
+  data: {
+    percentage: 0,
+    max: 0,
+    step: 0,
+    count: 0,
+    alertMessage: "",
+    alertImg: "",
+    events: {}
+  },
+  created () {
+    socket.on('EVENT', (obj) => {
+      console.log(obj);
+      if (obj.listener == "OnChannelPoint") {
+        this.alertMessage = obj.event.data.redemption.user.display_name + " redemed " + obj.event.data.redemption.reward.title;
+
+        axios.get('https://decapi.me/twitch/avatar/'+obj.event.data.redemption.user.display_name)
+        .then((response) => {
+          console.log(response.data);
+          this.alertImg = response.data;
+          // setTimeout(() => {
+          //   this.alertImg = "";
+          //   this.alertMessage = "";
+          // }, 10000);
+        })
+      }
+    });
+
+    socket.on('WIDGETS_DATA', (obj) => {
+      var data = obj.find(elem => {
+        return elem.name == "michel"
+      })
+      console.log(data);
+      this.max = data.max;
+      this.count = data.count;
+      this.step = data.goal;
+      this.percentage = ((data.count/data.max) * 100).toFixed(2);
+    });
+
+    socket.on('EVENT_LIST', (obj) => {
+      var data = obj.filter(elem => {
+        return elem.listener == "OnChannelPoint"
+      })
+      console.log(data);
+      this.events = data;
+    });
+  },
+
+  computed: {
+    lastEvent() {
+      return this.events.slice(-1)[0]
+    }
+  },
+
+  methods: {
+    send() {
+      socket.emit('message', {
+        message: "coucou"
+      });
+    }
+  }
+})
+</script>
+
+<style lang="scss" scoped>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat&display=swap');
+
+  html {
+    font-family: 'Montserrat', sans-serif;
+  }
+
+  *, *:before, *:after {
+    box-sizing: border-box;
+  }
+
+  .title {
+
+  }
+
+  .meter {
+    width: 500px;
+    height: 38px;
+    position: absolute;
+    top: 80px;
+    left: 10px;
+    z-index:-1;
+    background: #ddd;
+    border-radius: 13px;
+    padding: 0px;
+    overflow: hidden;
+    border: 3px solid #dadada;
+    background-color: white;
+  }
+
+  .meter > span {
+    display: block;
+    position: relative;
+    height: 100%;
+    border-radius: 0px;
+    background-color: blue;
+    overflow: hidden;
+
+    /* background: rgb(122,218,225);
+    background: linear-gradient(90deg, rgba(122,218,225,1) 0%, rgba(173,238,254,1) 100%); */
+    background: #a97445;
+    background: linear-gradient(90deg, #a97445 0%, #cea266 100%);
+  }
+  .legend{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    transform: translate(-50%,-50%);
+    font-size: 20px;
+    color: #000;
+    text-align:center;
+    font-weight:1200;
+    font-size: 18px;
+    line-height: 1.2em;
+    color: #dadada;
+  }
+
+  .goal {
+    position: absolute;
+    left: 520px;
+    top: 28px;
+  }
+
+  .alert {
+    position: absolute;
+    top: 50px;
+    left: 10px;
+  }
+  .alertImg {
+    position: absolute;
+    top: 100px;
+    left: 10px;
+    width: 100px;
+    height: auto;
+  }
+  .lastEvent {
+    position: absolute;
+    top: 240px;
+    left: 10px;
+  }
+</style>
+
+</html>

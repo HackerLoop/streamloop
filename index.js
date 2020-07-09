@@ -84,7 +84,8 @@ if (parser) {
             data.offset = data.count;
             // do something
             // trigger pump
-            console.log("trigger Air Pump !");
+            console.log("trigger Air Pump !", data.duration+"s");
+            io.sockets.emit("EVENT_ALERT_SERGE");
           }
           dbManager.updateWidgetData(data);
         });
