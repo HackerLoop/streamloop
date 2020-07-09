@@ -43,9 +43,13 @@
     </div>
     <br>
     <br>
-    
+
     <div class="users container" v-if="widgetsData[1]">
-      <h1><a target="_blank" href="/dossier.html">Overlay {{widgetsData[1].name}}</a></h1>
+      <h1>Overlay {{widgetsData[1].name}}</h1>
+      <a target="_blank" href="/dossier-bar.html">Progress Bar</a>
+      <br>
+      <a target="_blank" href="/dossier-alert.html">Alert</a>
+      <br>
       <br>
       <form v-on:submit.prevent="updateWidget(1)">
         <table class="table is-bordered is-striped">

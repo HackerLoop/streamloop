@@ -8,18 +8,12 @@
 </head>
 <body>
   <div id="app">
-    <h1>{{count}}/{{goal}}</h1>
-    <div class="lastEvent" v-if="events.length">
-      <h3>last Event: "{{lastEvent.event.user}}" donate  {{lastEvent.event.amount.toLocaleString(undefined,{style: 'currency',currency:"EUR"})}}</h3>
-      <p>{{lastEvent.event.message}}</p>
-    </div>
-    <!-- <h2 class="alert">Alert: {{alertMessage}}</h2>
-    <img class="alertImg" v-bind:src="alertImg" /> -->
-
-    <br>
-    <div v-if="dossierImg">
+    <div class="container" v-if="dossierImg">
       <img class="dossierImg" v-bind:src="dossierImg" />
     </div>
+    <!-- <div class="container">
+      <img class="dossierImg" src="http://res.cloudinary.com/dcr72h6g0/image/upload/v1593649321/test/giphy_oqseh7.gif" />
+    </div> -->
   </div>
 </body>
 
@@ -114,13 +108,26 @@ var app = new Vue({
     font-family: 'arial', sans-serif;
   }
 
+  html {
+    text-align: center;
+  }
+
   .alertImg {
     width: 100px;
     height: auto;
   }
 
+  .container {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 100vh;
+    justify-content: center;
+  }
+
   .dossierImg {
-    width: 200px;
+    display: inline-block;
+    width: 600px;
     height: auto;
   }
 </style>
