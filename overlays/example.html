@@ -64,7 +64,7 @@ var app = new Vue({
 
     socket.on('WIDGETS_DATA', (obj) => {
       var data = obj.find(elem => {
-        return elem.name == "michel"
+        return elem.name == "serge"
       })
       console.log(data);
       this.goal = data.max;

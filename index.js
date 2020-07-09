@@ -76,7 +76,7 @@ if (parser) {
       }
       dbManager.addEvent(newEvent);
 
-      dbManager.getWidgetData("michel")
+      dbManager.getWidgetData("serge")
         .then(data => {
           data.count++;
           if (data.count > data.max) { return false; };
