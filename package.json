@@ -4,8 +4,7 @@
   "description": "streamloop",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js"
+    "start": "CLOUDINARY_URL=cloudinary://338736368515393:v_JjZ0eymL4SQnlTUDaqh5mM_P4@hzim7siiy nodemon index.js"
   },
   "repository": {
     "type": "git",
@@ -30,6 +29,7 @@
     "mongodb": "^3.5.9",
     "socket.io": "^2.3.0",
     "socket.io-client": "^2.3.0",
+    "tplink-cloud-api": "^0.6.1",
     "ws": "^7.3.0"
   }
 }

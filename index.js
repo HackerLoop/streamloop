@@ -86,6 +86,7 @@ if (parser) {
             // trigger pump
             console.log("trigger Air Pump !", data.duration+"s");
             io.sockets.emit("EVENT_ALERT_SERGE");
+            triggerSerge(data.duration);
           }
           dbManager.updateWidgetData(data);
         });
@@ -134,16 +135,16 @@ controller.runInit();
 
 const cloudinary = require('cloudinary').v2;
 
-cloudinary.config({
-  cloud_name: "dcr72h6g0",
-  api_key: "378243186252451",
-  api_secret: "vCuEp73WpSC_ydasMRYhFKcp_pw"
-});
+// cloudinary.config({
+//   cloud_name: "dcr72h6g0",
+//   api_key: "378243186252451",
+//   api_secret: "vCuEp73WpSC_ydasMRYhFKcp_pw"
+// });
 
 function revealDossier(data) {
   cloudinary.api.resources({
       type: 'upload',
-      prefix: 'test/'
+      prefix: 'TwitchPhotosDossier/'
     },
     function(error, result) {
       if (error) {
@@ -155,9 +156,9 @@ function revealDossier(data) {
           return !data.revealed.includes(elem.asset_id);
         });
         if (remaining.length <= 0) {
-          remaining = result.resources;
-          data.revealed = [];
-          console.log("no more 'dossier'! restart");
+          // remaining = result.resources;
+          // data.revealed = [];
+          console.log("no more 'dossier'!");
         }
 
         var item = remaining[Math.floor(Math.random() * remaining.length)];
@@ -177,4 +178,59 @@ function revealDossier(data) {
     }
   );
 
+}
+
+const { login } = require("tplink-cloud-api");
+
+const TPLINK_USER = process.env.TPLINK_USER || "jorand.lepape@gmail.com";
+const TPLINK_PASS = process.env.TPLINK_PASS || "just4now";
+const TPLINK_TERM = process.env.TPLINK_TERM || "ce84004a-c4e6-4fb1-8760-a1fe2145af95";
+
+var tplink;
+
+async function triggerSerge(timer) {
+  if (!tplink) {
+    console.log("ERROR: tplink is null");
+    return false;
+  }
+  await tplink.getHS100("Serge").powerOn();
+  await delay(timer*1000);
+  await tplink.getHS100("Serge").powerOff();
+}
+
+async function tpLinkConnect() {
+  // log in to cloud, return a connected tplink object
+  tplink = await login(TPLINK_USER, TPLINK_PASS, TPLINK_TERM);
+  console.log("tpLink Connected, current auth token is", tplink.getToken());
+
+  // get a list of raw json objects (must be invoked before .get* works)
+  // const dl = await tplink.getDeviceList();
+  // console.log(dl);
+
+  // find a device by alias:
+  //myPlug = tplink.getHS100("Serge");
+  // or find by deviceId:
+  // let myPlug = tplink.getHS100("558185B7EC793602FB8802A0F002BA80CB96F401");
+  //console.log("myPlug:", myPlug);
+
+  //let response = await myPlug.powerOn();
+  //console.log("response=" + response );
+
+  // let response = await myPlug.toggle();
+  // console.log("response=" + response);
+  //
+  // response = await myPlug.getSysInfo();
+  // console.log("relay_state=" + response.relay_state);
+  //
+  // console.log(await myPlug.getRelayState());
+}
+
+tpLinkConnect();
+
+function delay(t, val) {
+   return new Promise(function(resolve) {
+       setTimeout(function() {
+           resolve(val);
+       }, t);
+   });
 }
