@@ -8,14 +8,29 @@
 </head>
 <body>
   <div id="app">
-    <img class="title" src="./assets/overlay-photo-title.png" width="502" height="120" alt="">
+    <div class="progress-container">
+      <div class="progress-title">
+        La Machine à dossiers
+        <img class="icon" src="./assets/polaroid.svg" alt="">
+      </div>
+      <div class="progress">
+        <div class="progress-bar" :style="{width: Math.min(100, percentage) + '%'}"></div>
+        <div class="progress-text">{{parseFloat(count).toFixed(2)}} €</div>
+      </div>
+      <div class="progress-legend">
+
+        <div class="left">0 €</div>
+        <div class="right">{{goal}} €</div>
+      </div>
+    </div>
+    <!-- <img class="title" src="./assets/overlay-photo-title.png" width="502" height="120" alt="">
     <div class="meter">
       <span id="bar" :style="{width: Math.min(100, percentage) + '%'}">
       </span>
       <div class="legend">
         <span id="percent">{{parseFloat(count).toFixed(2)}} €</span>
       </div>
-    </div>
+    </div> -->
     <!-- <div class="lastEvent" v-if="events.length">
       <h3>{{lastEvent.event.user}} donate  {{lastEvent.event.amount.toLocaleString(undefined,{style: 'currency',currency:"EUR"})}}</h3>
     </div> -->
@@ -118,15 +133,87 @@ var app = new Vue({
 </script>
 
 <style lang="scss" scoped>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Montserrat&display=swap');
 
-html {
+html, body {
   font-family: 'Montserrat', sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
 *, *:before, *:after {
   box-sizing: border-box;
 }
+
+.progress-container {
+  padding: 10px 20px;
+}
+
+  .progress-title {
+    text-align: center;
+    font-family: 'Anton', sans-serif;
+    color: white;
+    text-shadow: 0 0 5px rgba(0,0,0,0.8);
+    font-size: 37px;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+    .progress-title .icon {
+      margin-left: 10px;
+    }
+
+  .progress {
+    position: relative;
+    height: 48px;
+    overflow: hidden;
+    border: 3px solid #dadada;
+    background-color: white;
+    border-radius: 20px;
+  }
+
+  .progress-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+    height: 100%;
+    width: 50%;
+    border-radius: 0px;
+    background-color: blue;
+    overflow: hidden;
+    background: rgb(122,218,225);
+    background: linear-gradient(90deg, rgba(122,218,225,1) 0%, rgba(173,238,254,1) 100%);
+  }
+
+  .progress-text {
+    position: relative;
+    text-align: center;
+    font-size: 28px;
+    line-height: 45px;
+    color: #000;
+    z-index: 1;
+  }
+
+  .progress-legend {
+    text-align: center;
+    color: rgb(255, 255, 255);
+    font-size: 18px;
+    text-shadow: 0 0 5px #000;
+    font-family: 'Anton', sans-serif;
+    margin-top: 5px;
+  }
+
+  .progress-legend .left {
+    float: left;
+  }
+  .progress-legend .right {
+    float: right;
+  }
+
 
 .title {
 
