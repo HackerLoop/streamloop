@@ -59,6 +59,7 @@ var server = http.listen(PORT, () => {
 require('./js/controller.js');
 require('./js/streamElementsAlert/streamElementsAlertHandler');
 require('./js/channelPoint/channelPointHandler');
+require('./js/chat/chatHandler');
 
 // OnChannelPoint "Recompense 2"
 var parser = controller.getParser('ChannelPoint');
@@ -68,6 +69,7 @@ if (parser) {
     "Recompense 2"
   ], controller.triggerCount);
   controller.triggerData[controller.triggerCount] = [
+    ["Chat", "Send", "{user} a récupéré : Du bouche à bouche pour Serge !"],
     ["FUNCTION", (msg) => {
       console.log("Recompense 2", msg.data);
       var newEvent = {
@@ -103,6 +105,7 @@ if (parserSE) {
     "OnSEDonation"
   ], controller.triggerCount);
   controller.triggerData[controller.triggerCount] = [
+    ["Chat", "Send", "{user} a fait un don de {amount} € ! Bientôt la photo dossier ! "],
     ["FUNCTION", (msg) => {
       console.log(msg);
       var newEvent = {
