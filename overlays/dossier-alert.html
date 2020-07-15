@@ -9,9 +9,11 @@
 <body>
   <div id="app">
     <div class="container" v-if="dossierImg">
+      <img class="chest" v-bind:src="chestImg">
       <img class="dossierImg" v-bind:src="dossierImg" />
     </div>
     <!-- <div class="container">
+      <img class="chest" src="./assets/treasurechest.gif" alt="">
       <img class="dossierImg" src="http://res.cloudinary.com/dcr72h6g0/image/upload/v1593649321/test/giphy_oqseh7.gif" />
     </div> -->
   </div>
@@ -25,6 +27,9 @@ let sessionData;
 
 var timer;
 
+let audio = new Audio('./assets/sfx/master-sword.mp3');
+audio.volume = 1;
+
 var socket = io('', {query: "user=hackerloop"});
 var app = new Vue({
   el: '#app',
@@ -35,7 +40,8 @@ var app = new Vue({
     alertMessage: "",
     alertImg: "",
     events: {},
-    dossierImg: ""
+    dossierImg: "",
+    chestImg: ""
   },
   created () {
     /*
@@ -84,9 +90,12 @@ var app = new Vue({
     socket.on('EVENT_DOSSIER', (obj) => {
       console.log(obj);
       this.dossierImg = obj.url;
+      this.chestImg = './assets/treasurechest.gif';
+      audio.play();
       clearTimeout(timer);
       var timer = setTimeout(() => {
         this.dossierImg = "";
+        this.chestImg = "";
       }, this.duration);
     });
   },
@@ -108,8 +117,9 @@ var app = new Vue({
     font-family: 'arial', sans-serif;
   }
 
-  html {
-    text-align: center;
+  html, body {
+    margin: 0;
+    padding: 0;
   }
 
   .alertImg {
@@ -123,12 +133,56 @@ var app = new Vue({
     width: 100%;
     min-height: 100vh;
     justify-content: center;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+  }
+
+  @keyframes imgZoom {
+    0% {
+      width: 0%;
+      height: 0%;
+      opacity: 0;
+    }
+    50% {
+      width: 0%;
+      height: 0%;
+      opacity: 1;
+    }
+    100% {
+      width: 90%;
+      height: 90%;
+      opacity: 1;
+    }
+  }
+
+  @keyframes chestIn {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
   }
 
   .dossierImg {
     display: inline-block;
     width: 600px;
     height: auto;
+    width: 90%;
+    height: 90%;
+    object-fit: contain;
+    /* transition: all 1s ease-out; */
+    z-index: 1;
+    animation: 2s ease-out 0s 1 imgZoom;
+  }
+
+  .chest {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    animation: 1s ease-out 0s 1 chestIn;
   }
 </style>
 
