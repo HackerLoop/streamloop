@@ -4,7 +4,8 @@
   "description": "streamloop",
   "main": "index.js",
   "scripts": {
-    "start": "CLOUDINARY_URL=cloudinary://338736368515393:v_JjZ0eymL4SQnlTUDaqh5mM_P4@hzim7siiy nodemon index.js"
+    "start": "node index.js",
+    "dev": "CLOUDINARY_URL=cloudinary://338736368515393:v_JjZ0eymL4SQnlTUDaqh5mM_P4@hzim7siiy nodemon index.js"
   },
   "repository": {
     "type": "git",
