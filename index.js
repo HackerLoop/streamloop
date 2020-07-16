@@ -35,7 +35,7 @@ app.get('/overlay/:token/:id', (req, res) => {
   }
 
   res.sendFile(__dirname + `/overlays/${req.params.id}.html`, (err) => {
-    console.log(err);
+    //console.log(err);
     if (err) {
       return res.status(400).send({ message: "overlay not found" });
     }
@@ -87,7 +87,6 @@ if (parser) {
     "Recompense 2"
   ], controller.triggerCount);
   controller.triggerData[controller.triggerCount] = [
-    ["Chat", "Send", "{user} a récupéré : Du bouche à bouche pour Serge !"],
     ["FUNCTION", (msg) => {
       console.log("Recompense 2", msg.data);
       var newEvent = {
@@ -123,7 +122,6 @@ if (parserSE) {
     "OnSEDonation"
   ], controller.triggerCount);
   controller.triggerData[controller.triggerCount] = [
-    ["Chat", "Send", "{user} a fait un don de {amount} € ! Bientôt la photo dossier ! "],
     ["FUNCTION", (msg) => {
       console.log(msg);
       var newEvent = {
@@ -164,6 +162,7 @@ const cloudinary = require('cloudinary').v2;
 
 function revealDossier(data) {
   cloudinary.api.resources({
+      resource_type: 'image',
       type: 'upload',
       prefix: 'TwitchPhotosDossier/'
     },
@@ -172,29 +171,46 @@ function revealDossier(data) {
         console.log(error);
       }
       if (result) {
-        console.log(result);
-        var remaining = result.resources.filter(elem => {
-          return !data.revealed.includes(elem.asset_id);
-        });
-        if (remaining.length <= 0) {
-          // remaining = result.resources;
-          // data.revealed = [];
-          console.log("no more 'dossier'!");
-        }
+        cloudinary.api.resources({
+            resource_type: 'video',
+            type: 'upload',
+            prefix: 'TwitchPhotosDossier/'
+          },
+          function(error, resultVideos) {
+            if (error) {
+              console.log(error);
+            }
+            if (resultVideos) {
+              Array.prototype.push.apply(result.resources, resultVideos.resources);
+              //result.resources.push();
+              console.log(result);
 
-        var item = remaining[Math.floor(Math.random() * remaining.length)];
+              var remaining = result.resources.filter(elem => {
+                return !data.revealed.includes(elem.asset_id);
+              });
+              if (remaining.length <= 0) {
+                // remaining = result.resources;
+                // data.revealed = [];
+                console.log("no more 'dossier'!");
+              }
 
-        if (item) {
-          console.log("item", item);
+              var item = remaining[Math.floor(Math.random() * remaining.length)];
 
-          io.sockets.emit("EVENT_DOSSIER", item);
+              if (item) {
+                console.log("item", item);
 
-          data.revealed.push(item.asset_id);
-          dbManager.updateWidgetData(data);
-        }
-        else {
-          console.log("no random item found in remaining dossier !");
-        }
+                io.sockets.emit("EVENT_DOSSIER", item);
+
+                data.revealed.push(item.asset_id);
+                dbManager.updateWidgetData(data);
+              }
+              else {
+                console.log("no random item found in remaining dossier !");
+              }
+            }
+          }
+        );
+
       }
     }
   );

@@ -11,10 +11,12 @@
     <div class="container" v-if="dossierImg">
       <img class="chest" v-bind:src="chestImg">
       <img class="dossierImg" v-bind:src="dossierImg" />
+      <video id="myVideo" class="dossierVideo" v-bind:src="dossierVideo" autoplay></video>
     </div>
     <!-- <div class="container">
       <img class="chest" src="/assets/treasurechest.gif" alt="">
       <img class="dossierImg" src="http://res.cloudinary.com/dcr72h6g0/image/upload/v1593649321/test/giphy_oqseh7.gif" />
+      <video id="myVideo" class="dossierVideo" src="https://res.cloudinary.com/hzim7siiy/video/upload/v1594890742/TwitchPhotosDossier/coverr-sample076-2660_zobaej.mp4" autoplay></video>
     </div> -->
   </div>
 </body>
@@ -41,6 +43,7 @@ var app = new Vue({
     alertImg: "",
     events: {},
     dossierImg: "",
+    dossierVideo: "",
     chestImg: ""
   },
   created () {
@@ -88,16 +91,30 @@ var app = new Vue({
     });
 
     socket.on('EVENT_DOSSIER', (obj) => {
-      console.log(obj);
-      this.dossierImg = obj.url;
-      this.chestImg = '/assets/treasurechest.gif';
-      audio.play();
-      clearTimeout(timer);
-      var timer = setTimeout(() => {
-        this.dossierImg = "";
-        this.chestImg = "";
-      }, this.duration);
+      if (obj.resource_type == "image") {
+        this.dossierImg = obj.url;
+        this.chestImg = '/assets/treasurechest.gif';
+        audio.play();
+        clearTimeout(timer);
+        var timer = setTimeout(() => {
+          this.dossierImg = "";
+          this.chestImg = "";
+          this.dossierVideo = "";
+        }, this.duration);
+      }
+      if (obj.resource_type == "video") {
+        this.dossierVideo = obj.url;
+        this.chestImg = '/assets/treasurechest.gif';
+        audio.play();
+      }
     });
+
+    document.getElementById('myVideo').addEventListener('ended',myHandler,false);
+    function myHandler(e) {
+      this.dossierImg = "";
+      this.dossierVideo = "";
+      this.chestImg = "";
+    }
   },
 
   computed: {
@@ -166,6 +183,19 @@ var app = new Vue({
   }
 
   .dossierImg {
+    display: inline-block;
+    width: 600px;
+    height: auto;
+    width: 90%;
+    height: 90%;
+    object-fit: contain;
+    /* transition: all 1s ease-out; */
+    z-index: 1;
+    animation: 2s ease-out 0s 1 imgZoom;
+  }
+
+  .dossierVideo {
+    position: absolute;
     display: inline-block;
     width: 600px;
     height: auto;
