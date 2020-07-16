@@ -171,45 +171,69 @@ function revealDossier(data) {
         console.log(error);
       }
       if (result) {
-        cloudinary.api.resources({
-            resource_type: 'video',
-            type: 'upload',
-            prefix: 'TwitchPhotosDossier/'
-          },
-          function(error, resultVideos) {
-            if (error) {
-              console.log(error);
-            }
-            if (resultVideos) {
-              Array.prototype.push.apply(result.resources, resultVideos.resources);
-              //result.resources.push();
-              console.log(result);
+        console.log(result);
 
-              var remaining = result.resources.filter(elem => {
-                return !data.revealed.includes(elem.asset_id);
-              });
-              if (remaining.length <= 0) {
-                // remaining = result.resources;
-                // data.revealed = [];
-                console.log("no more 'dossier'!");
-              }
+        var remaining = result.resources.filter(elem => {
+          return !data.revealed.includes(elem.asset_id);
+        });
+        if (remaining.length <= 0) {
+          // remaining = result.resources;
+          // data.revealed = [];
+          console.log("no more 'dossier'!");
+        }
 
-              var item = remaining[Math.floor(Math.random() * remaining.length)];
+        var item = remaining[Math.floor(Math.random() * remaining.length)];
 
-              if (item) {
-                console.log("item", item);
+        if (item) {
+          console.log("item", item);
 
-                io.sockets.emit("EVENT_DOSSIER", item);
+          io.sockets.emit("EVENT_DOSSIER", item);
 
-                data.revealed.push(item.asset_id);
-                dbManager.updateWidgetData(data);
-              }
-              else {
-                console.log("no random item found in remaining dossier !");
-              }
-            }
-          }
-        );
+          data.revealed.push(item.asset_id);
+          dbManager.updateWidgetData(data);
+        }
+        else {
+          console.log("no random item found in remaining dossier !");
+        }
+        // cloudinary.api.resources({
+        //     resource_type: 'video',
+        //     type: 'upload',
+        //     prefix: 'TwitchPhotosDossier/'
+        //   },
+        //   function(error, resultVideos) {
+        //     if (error) {
+        //       console.log(error);
+        //     }
+        //     if (resultVideos) {
+        //       Array.prototype.push.apply(result.resources, resultVideos.resources);
+        //       //result.resources.push();
+        //       console.log(result);
+        //
+        //       var remaining = result.resources.filter(elem => {
+        //         return !data.revealed.includes(elem.asset_id);
+        //       });
+        //       if (remaining.length <= 0) {
+        //         // remaining = result.resources;
+        //         // data.revealed = [];
+        //         console.log("no more 'dossier'!");
+        //       }
+        //
+        //       var item = remaining[Math.floor(Math.random() * remaining.length)];
+        //
+        //       if (item) {
+        //         console.log("item", item);
+        //
+        //         io.sockets.emit("EVENT_DOSSIER", item);
+        //
+        //         data.revealed.push(item.asset_id);
+        //         dbManager.updateWidgetData(data);
+        //       }
+        //       else {
+        //         console.log("no random item found in remaining dossier !");
+        //       }
+        //     }
+        //   }
+        // );
 
       }
     }

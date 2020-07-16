@@ -103,6 +103,7 @@ var app = new Vue({
         }, this.duration);
       }
       if (obj.resource_type == "video") {
+        clearTimeout(timer);
         this.dossierVideo = obj.url;
         this.chestImg = '/assets/treasurechest.gif';
         audio.play();
