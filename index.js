@@ -24,6 +24,20 @@ app.get('/admin', (req, res) => {
   // dbManager.test();
 })
 
+app.get('/overlay/:token/:id', (req, res) => {
+  console.log('token:', req.params.token);
+  if (!req.params.token || !req.params.id) {
+    return res.status(400).send({ message: "token or id missing" });
+  }
+
+  res.sendFile(__dirname + `/overlays/${req.params.id}.html`, (err) => {
+    console.log(err);
+    if (err) {
+      return res.status(400).send({ message: "overlay not found" });
+    }
+  });
+})
+
 app.use(express.static('./overlays'));
 
 io.on('connection', (socket) => {
