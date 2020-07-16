@@ -265,8 +265,8 @@ async function tpLinkConnect() {
   console.log("tpLink Connected, current auth token is", tplink.getToken());
 
   // get a list of raw json objects (must be invoked before .get* works)
-  // const dl = await tplink.getDeviceList();
-  // console.log(dl);
+  const dl = await tplink.getDeviceList();
+  console.log(dl);
 
   // find a device by alias:
   //myPlug = tplink.getHS100("Serge");
