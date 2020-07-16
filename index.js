@@ -24,6 +24,10 @@ app.get('/camillelv', (req, res) => {
   // dbManager.test();
 })
 
+app.get('/admin', (req, res) => {
+  res.sendFile(__dirname + '/pages/admin.html');
+})
+
 app.get('/overlay/:token/:id', (req, res) => {
   console.log('token:', req.params.token);
   if (!req.params.token || !req.params.id) {
