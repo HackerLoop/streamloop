@@ -254,9 +254,9 @@ async function triggerSerge(timer) {
     console.log("ERROR: tplink is null");
     return false;
   }
-  await tplink.getHS100("Serge").powerOn();
+  await tplink.getHS100("Serge le punching ball").powerOn();
   await delay(timer*1000);
-  await tplink.getHS100("Serge").powerOff();
+  await tplink.getHS100("Serge le punching ball").powerOff();
 }
 
 async function tpLinkConnect() {
