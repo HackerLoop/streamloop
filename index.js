@@ -19,7 +19,7 @@ app.get('/', (req, res) => {
   // dbManager.test();
 })
 
-app.get('/admin', (req, res) => {
+app.get('/camillelv', (req, res) => {
   res.sendFile(__dirname + '/pages/admin.html');
   // dbManager.test();
 })
