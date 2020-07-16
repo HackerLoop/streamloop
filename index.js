@@ -84,11 +84,11 @@ var parser = controller.getParser('ChannelPoint');
 if (parser) {
   parser.addTriggerData('OnChannelPoint', [
     "OnChannelPoint",
-    "Recompense 2"
+    "Du bouche-à-bouche pour Serge !"
   ], controller.triggerCount);
   controller.triggerData[controller.triggerCount] = [
     ["FUNCTION", (msg) => {
-      console.log("Recompense 2", msg.data);
+      console.log("Du bouche-à-bouche pour Serge !", msg.data);
       var newEvent = {
         listener: 'OnChannelPoint',
         event: msg.data
