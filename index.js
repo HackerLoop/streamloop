@@ -44,6 +44,23 @@ app.get('/overlay/:token/:id', (req, res) => {
 
 app.use(express.static('./overlays'));
 
+var admin = io.of('/admin'),
+    client = io.of('');
+
+
+admin.on('connection', function (socket) {
+  socket.on('message', function(m) {
+    console.log(m);
+  });
+
+  getResources().then((data) => {
+    admin.emit('DOSSIER_LIST', data);
+  })
+
+  //admin.emit('message1', 'Message1: admin to admin');
+  //client.emit('message1', 'Message1: admin to client');
+});
+
 io.on('connection', (socket) => {
   console.log('a user connected');
   // console.log(socket.handshake.query.user);
@@ -64,6 +81,10 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', (error) => {
     console.log('user disconnected', error);
+  });
+
+  socket.on('TEST_SERGE', (data) => {
+    triggerSerge(data);
   });
 });
 
@@ -153,6 +174,34 @@ controller.doneParsing();
 controller.runInit();
 
 const cloudinary = require('cloudinary').v2;
+
+async function getResources() {
+  var images = await cloudinary.api.resources({
+    resource_type: 'image',
+    type: "upload",
+    prefix: "TwitchPhotosDossier/",
+    max_results: 500
+  }).catch(e => {
+    console.log(`Error: ${e.error.message}`);
+    images.resources = [];
+  });
+
+  var videos = await cloudinary.api.resources({
+    resource_type: 'video',
+    type: "upload",
+    prefix: "TwitchPhotosDossier/",
+    max_results: 500
+  }).catch(e => {
+    console.log(`Error: ${e.error.message}`);
+    videos.resources = [];
+  });
+
+  var result = [...images.resources, ...videos.resources].sort((a, b) => (a.created_at > b.created_at) ? -1 : 1);
+
+  return result;
+}
+
+
 
 // cloudinary.config({
 //   cloud_name: "dcr72h6g0",

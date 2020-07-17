@@ -14,11 +14,13 @@
 <body>
   <div id="app">
     <div class="users container" v-if="widgetsData[0]">
-      <h1>Overlay {{widgetsData[0].name}}</h1>
+      <h1 class="title is-4">Overlay {{widgetsData[0].name}}</h1>
       <a target="_blank" href="/overlay/camillelv/serge-bar">Progress Bar</a>
       <br>
       <a target="_blank" href="/overlay/camillelv/serge-alert">Alert</a>
       <br>
+      <!-- <button type="button" @click="testSerge(widgetsData[0].duration)">Test pompe Serge</button>
+      <br> -->
       <br>
       <form v-on:submit.prevent="updateWidget(0)">
         <table class="table is-bordered is-striped">
@@ -47,7 +49,7 @@
     <br>
 
     <div class="users container" v-if="widgetsData[1]">
-      <h1>Overlay {{widgetsData[1].name}}</h1>
+      <h1 class="title is-4">Overlay {{widgetsData[1].name}}</h1>
       <a target="_blank" href="/overlay/camillelv/dossier-bar">Progress Bar</a>
       <br>
       <a target="_blank" href="/overlay/camillelv/dossier-alert">Alert</a>
@@ -59,7 +61,7 @@
             <th>name</th>
             <th>goal</th>
             <th>count</th>
-            <th>duration</th>
+            <th>duration (s)</th>
             <th>revealed</th>
           </tr>
           <tr>
@@ -80,18 +82,44 @@
     <div class="users container">
       <button id="upload_widget" class="cloudinary-button" @click="showWidget">Upload files</button>
     </div>
+    <br>
+    <div class="dossierGallery columns is-multiline">
+      <div class="column is-one-quarter" v-for="item in resourcesGallery" :key="item.asset_id">
+        <div class="card">
+          <div class="card-image">
+            <figure class="image is-3by2">
+              <img :src="item.url" v-if="item.resource_type == 'image'">
+              <!-- <img src="https://bulma.io/images/placeholders/256x256.png" v-if="item.resource_type == 'video'"> -->
+            </figure>
+          </div>
+          <div class="card-content">
+            <div class="content">
+              {{item.url.substring(item.url.lastIndexOf('/')+1)}}
+              <div v-if="widgetsData[1].revealed.includes(item.asset_id)">
+                <span class="tag is-link is-normal">revealed</span>
+                <button type="button" @click="cancelDossierRevealed(item.asset_id)">Reset</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <br>
+
   </div>
 </body>
 
 <script>
 
   var socket = io();
+  const adminSocket = io('/admin');
   var app = new Vue({
     el: '#app',
     data: {
       message: 'Hello Vue!',
       widgetsData: [],
-      myWidget: null
+      myWidget: null,
+      resourcesGallery: []
     },
     created () {
       window.onbeforeunload = () => {
@@ -100,6 +128,11 @@
 
       socket.on('WIDGETS_DATA', (obj) => {
         this.widgetsData = obj;
+        console.log(obj);
+      });
+
+      adminSocket.on('DOSSIER_LIST', (obj) => {
+        this.resourcesGallery = obj;
         console.log(obj);
       });
 
@@ -146,8 +179,17 @@
         socket.emit('UPDATE_WIDGET', this.widgetsData[index]);
       },
 
+      cancelDossierRevealed(id) {
+        this.widgetsData[1].revealed.splice(this.widgetsData[1].revealed.indexOf(id), 1);
+        socket.emit('UPDATE_WIDGET', this.widgetsData[1]);
+      },
+
       showWidget(widget) {
         this.myWidget.open();
+      },
+
+      testSerge(duration) {
+        socket.emit('TEST_SERGE', duration);
       }
     }
   })
@@ -162,6 +204,14 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .dossierGallery .card-image .image {
+    display: flex;
+    background-color: black;
+  }
+  .dossierGallery .card-image .image img {
+    object-fit: contain;
   }
 </style>
 
