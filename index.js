@@ -7,6 +7,12 @@ const cors = require('cors');
 
 const dbManager = require('./js/dbManager');
 
+console.log("NODE_ENV", process.env.NODE_ENV);
+
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
+
 const PORT = process.env["PORT"] || 8080;
 let ip = require('ip').address();
 
@@ -103,13 +109,16 @@ require('./js/chat/chatHandler');
 // OnChannelPoint "Recompense 2"
 var parser = controller.getParser('ChannelPoint');
 if (parser) {
+  var channelPointName = process.env.NODE_ENV !== 'production' ? 'Recompense 1': "Du bouche-à-bouche pour Serge !";
+
   parser.addTriggerData('OnChannelPoint', [
     "OnChannelPoint",
-    "Du bouche-à-bouche pour Serge !"
+    channelPointName
   ], controller.triggerCount);
   controller.triggerData[controller.triggerCount] = [
     ["FUNCTION", (msg) => {
-      console.log("Du bouche-à-bouche pour Serge !", msg.data);
+      console.dir(msg.data, { depth: null });
+
       var newEvent = {
         listener: 'OnChannelPoint',
         event: msg.data
@@ -201,15 +210,10 @@ async function getResources() {
   return result;
 }
 
-
-
-// cloudinary.config({
-//   cloud_name: "dcr72h6g0",
-//   api_key: "378243186252451",
-//   api_secret: "vCuEp73WpSC_ydasMRYhFKcp_pw"
-// });
-
 function revealDossier(data) {
+  // getResources().then((data) => {
+  //   lol
+  // })
   cloudinary.api.resources({
       resource_type: 'image',
       type: 'upload',
@@ -291,10 +295,7 @@ function revealDossier(data) {
 }
 
 const { login } = require("tplink-cloud-api");
-
-const TPLINK_USER = process.env.TPLINK_USER || "jorand.lepape@gmail.com";
-const TPLINK_PASS = process.env.TPLINK_PASS || "just4now";
-const TPLINK_TERM = process.env.TPLINK_TERM || "ce84004a-c4e6-4fb1-8760-a1fe2145af95";
+const { v4: uuidV4 } = require('uuid');
 
 var tplink;
 
@@ -310,8 +311,12 @@ async function triggerSerge(timer) {
 
 async function tpLinkConnect() {
   // log in to cloud, return a connected tplink object
-  tplink = await login(TPLINK_USER, TPLINK_PASS, TPLINK_TERM);
-  console.log("tpLink "+TPLINK_USER+" Connected, current auth token is", tplink.getToken());
+  tplink = await login(
+    process.env.TPLINK_USER,
+    process.env.TPLINK_PASS,
+    process.env.TPLINK_TERM || uuidV4()
+  );
+  console.log("tpLink "+process.env.TPLINK_USER+" Connected, current auth token is", tplink.getToken());
 
   // get a list of raw json objects (must be invoked before .get* works)
   const dl = await tplink.getDeviceList();

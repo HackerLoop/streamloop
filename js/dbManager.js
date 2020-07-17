@@ -44,10 +44,12 @@ const init = async (io) => {
   try {
     let eventList = await Events.find().toArray();
     let widgetsData = await Widgets.find().toArray();
-    socketio.emit("EVENT_LIST", eventList);
-    socketio.emit("WIDGETS_DATA", widgetsData);
+    if (socketio) {
+      socketio.emit("EVENT_LIST", eventList);
+      socketio.emit("WIDGETS_DATA", widgetsData);
+    }
   } catch(err) {
-    console.log(err);
+    //console.log(err);
   }
 }
 
@@ -58,10 +60,12 @@ const addEvent = async (eventData) => {
     var dbEvent = await Events.insertOne(eventData);
     let newEvent = await Events.findOne({_id: dbEvent.insertedId});
     let eventList = await Events.find().toArray();
-    socketio.emit("EVENT_LIST", eventList);
-    socketio.emit("EVENT", newEvent);
+    if (socketio) {
+      socketio.emit("EVENT_LIST", eventList);
+      socketio.emit("EVENT", newEvent);
+    }
   } catch(err) {
-    console.log(err);
+    //console.log(err);
   }
 }
 
@@ -84,7 +88,9 @@ const updateWidgetData = async (data) => {
   try {
     await Widgets.updateOne({name: data.name}, {$set: data});
     let widgetsData = await Widgets.find().toArray();
-    socketio.emit("WIDGETS_DATA", widgetsData);
+    if (socketio) {
+      socketio.emit("WIDGETS_DATA", widgetsData);
+    }
   } catch(err) {
     console.log(err);
   }

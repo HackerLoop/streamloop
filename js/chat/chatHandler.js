@@ -360,10 +360,6 @@ class ChatHandler extends Handler {
  */
 function chatHandlerExport() {
   var chat = new ChatHandler();
-  Utils.readFile('settings/chat-user.txt', function(user) {
-    Utils.readFile('settings/chat-oauth.txt', function(oauth) {
-      chat.init(process.env.CHAT_USER || user.trim(), process.env.CHAT_OAUTH || oauth.trim());
-    });
-  });
+  chat.init(process.env.CHAT_USER, process.env.CHAT_OAUTH);
 }
 chatHandlerExport();
