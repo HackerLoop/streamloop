@@ -1,12 +1,14 @@
 const io = require('socket.io-client');
+const Utils = require('../utils.js');
 
 /**
  * Connect to the StreamElements websocket and setup the event handlers
  * @param {Handler} streamElementHandler StreamElements Handler
  * @param {string} token StreamElements JWT token
+ * @param {method} onTestEvent method to call when test events are received
  * @param {method} onEvent method to call when events are received
  */
-exports.connect = function(streamElementHandler, token, onEvent) {
+exports.connect = function(streamElementHandler, token, onTestEvent, onEvent) {
   const socket = io('https://realtime.streamelements.com', {
       transports: ['websocket']
   });
@@ -27,11 +29,10 @@ exports.connect = function(streamElementHandler, token, onEvent) {
 
   // Socket is authenticated
   socket.on('authenticated', function(data) {
-    console.log(data);
     const channelId = data.channelId;
     console.log(`Successfully connected to channel ${channelId}`);
   });
 
-  socket.on('event:test', onEvent);
+  socket.on('event:test', onTestEvent);
   socket.on('event', onEvent);
 }

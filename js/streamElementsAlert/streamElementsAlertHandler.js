@@ -10,34 +10,44 @@ class StreamElementsAlertHandler extends Handler {
     super('StreamElementsAlert',['OnSETwitchBits','OnSETwitchBulkGiftSub','OnSEDonation','OnSETwitchFollow','OnSETwitchGiftSub','OnSETwitchHost','OnSETwitchRaid','OnSETwitchSub']);
     this.alerts = [];
     this.alertsTrigger = {
-      'cheer-latest': [],
+      'cheer': [],
       'bulk_sub': [],
-      'tip-latest': [],
-      'follower-latest': [],
+      'tip': [],
+      'follower': [],
       'gift_sub': [],
-      'host-latest': [],
-      'raid-latest': [],
-      'subscriber-latest': []
+      'host': [],
+      'raid': [],
+      'subscriber': []
     };
     this.alertMapping = {
-      'onsetwitchbits': 'cheer-latest',
+      'onsetwitchbits': 'cheer',
       'onsetwitchbulkgiftsub': 'bulk_sub',
-      'onsedonation': 'tip-latest',
-      'onsetwitchfollow': 'follower-latest',
+      'onsedonation': 'tip',
+      'onsetwitchfollow': 'follower',
       'onsetwitchgiftsub': 'gift_sub',
-      'onsetwitchhost': 'host-latest',
-      'onsetwitchraid': 'raid-latest',
-      'onsetwitchsub': 'subscriber-latest'
+      'onsetwitchhost': 'host',
+      'onsetwitchraid': 'raid',
+      'onsetwitchsub': 'subscriber'
     };
     this.eventHandlers = {
-      'cheer-latest': this.getBitParameters,
+      'cheer': this.getBitParameters,
       'bulk_sub': this.getBulkGiftParameters,
-      'tip-latest': this.getDonationParameters,
-      'follower-latest': this.getFollowParameters,
+      'tip': this.getDonationParameters,
+      'follower': this.getFollowParameters,
       'gift_sub': this.getGiftSubParameters,
-      'host-latest': this.getHostParameters,
-      'raid-latest': this.getRaidParameters,
-      'subscriber-latest': this.getSubParameters
+      'host': this.getHostParameters,
+      'raid': this.getRaidParameters,
+      'subscriber': this.getSubParameters
+    };
+    this.testEventMapper = {
+      'cheer-latest':'cheer',
+      'bulk_sub': 'bulk_sub',
+      'tip-latest': 'tip',
+      'follower-latest': 'follower',
+      'gift_sub': 'gift_sub',
+      'host-latest': 'host',
+      'raid-latest': 'raid',
+      'subscriber-latest': 'subscriber'
     };
   }
 
@@ -46,7 +56,7 @@ class StreamElementsAlertHandler extends Handler {
    * @param {string} jwtToken streamelements jwt token
    */
   init(jwtToken) {
-    SEWebsocket.connect(this, jwtToken, this.onStreamElementsMessage.bind(this));
+    SEWebsocket.connect(this, jwtToken, this.onStreamElementsTestMessage.bind(this), this.onStreamElementsMessage.bind(this));
   }
 
   /**
@@ -64,10 +74,9 @@ class StreamElementsAlertHandler extends Handler {
 
   /**
    * Handle event messages from streamelements websocket.
-   * @param {Object} message streamelements event message
+   * @param {Object} message streamelements test event message
    */
-  onStreamElementsMessage(message) {
-    console.log("MSG", message);
+  onStreamElementsTestMessage(message) {
     var type = message.listener;
     if (type === 'subscriber-latest') {
       if (message.event.gifted) {
@@ -76,8 +85,30 @@ class StreamElementsAlertHandler extends Handler {
         type = 'bulk_sub';
       }
     }
+    type = this.testEventMapper[type];
     if (this.alerts.indexOf(type) != -1) {
       var params = this.eventHandlers[type](message.event);
+      this.alertsTrigger[type].forEach(triggerId => {
+        controller.handleData(triggerId, params);
+      });
+    }
+  }
+
+  /**
+   * Handle event messages from streamelements websocket.
+   * @param {Object} message streamelements event message
+   */
+  onStreamElementsMessage(message) {
+    var type = message.type;
+    if (type === 'subscriber') {
+      if (message.data.gifted) {
+        type = 'gift_sub';
+      } else if (message.data.bulkGifted) {
+        type = 'bulk_sub';
+      }
+    }
+    if (this.alerts.indexOf(type) != -1) {
+      var params = this.eventHandlers[type](message.data);
       this.alertsTrigger[type].forEach(triggerId => {
         controller.handleData(triggerId, params);
       });
@@ -118,7 +149,7 @@ class StreamElementsAlertHandler extends Handler {
       'data': event,
       'amount': event.amount,
       'message': event.message,
-      'user': event.name
+      'user': event.displayName
     }
   }
 
@@ -129,7 +160,7 @@ class StreamElementsAlertHandler extends Handler {
   getFollowParameters(event) {
     return {
       'data': event,
-      'user': event.name
+      'user': event.displayName
     }
   }
 
@@ -140,9 +171,9 @@ class StreamElementsAlertHandler extends Handler {
   getGiftSubParameters(event) {
     return {
       'data': event,
-      'user': event.name,
+      'user': event.displayName,
       'gifter': event.sender,
-      'tier': event.tier === 'prime' ? 'Prime' : 'Tier ' + (event.tier / 1000)
+      'tier': event.tier === 'prime' ? 'Prime' : 'Tier ' + (parseInt(event.tier) / 1000)
     }
   }
 
@@ -153,7 +184,7 @@ class StreamElementsAlertHandler extends Handler {
   getHostParameters(event) {
     return {
       'data': event,
-      'user': event.name,
+      'user': event.displayName,
       'viewers': event.amount
     }
   }
@@ -165,7 +196,7 @@ class StreamElementsAlertHandler extends Handler {
   getRaidParameters(event) {
     return {
       'data': event,
-      'user': event.name,
+      'user': event.displayName,
       'raiders': event.amount
     }
   }
@@ -177,10 +208,10 @@ class StreamElementsAlertHandler extends Handler {
   getSubParameters(event) {
     return {
       'data': event,
-      'user': event.name,
+      'user': event.displayName,
       'months': event.amount,
       'message': event.message,
-      'tier': event.tier === 'prime' ? 'Prime' : 'Tier ' + (event.tier / 1000)
+      'tier': event.tier === 'prime' ? 'Prime' : 'Tier ' + (parseInt(event.tier) / 1000)
     }
   }
 }
@@ -190,8 +221,6 @@ class StreamElementsAlertHandler extends Handler {
  */
 function streamElementsAlertHandlerExport() {
   var streamElementsAlert = new StreamElementsAlertHandler();
-  Utils.readFile('settings/streamelements-jwtToken.txt', function(id) {
-    streamElementsAlert.init(process.env.SE_TOKEN || id.trim());
-  });
+  streamElementsAlert.init(process.env.SE_TOKEN);
 }
 streamElementsAlertHandlerExport();

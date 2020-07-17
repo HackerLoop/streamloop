@@ -10,34 +10,35 @@ exports.connect = function(channelId, onMessage) {
 	// Create the websocket connection
 	var socket = new WebSocket('wss://pubsub-edge.twitch.tv');
 
-  var nonce = Utils.randomString(18);
-  var topic = "community-points-channel-v1." + channelId;
+	var nonce = Utils.randomString(18);
 
 	// WS OnOpen event : authenticate
 	socket.onopen = function() {
 		// Create authentication payload and request required events
 		var auth = {
-      "type": "LISTEN",
-      "nonce": nonce,
-      "data": {
-        "topics": [topic],
-      }
-    };
+			"type": "LISTEN",
+			"nonce": nonce,
+			"data": {
+				"topics": [
+					"community-points-channel-v1." + channelId,
+					"hype-train-events-v1." + channelId
+				],
+			}
+		};
 		// Send authentication payload to Streamlabs Chatbot
 		socket.send(JSON.stringify(auth));
-		console.log(`Successfully connected to topic ${topic}`);
 	};
 
-  setInterval(function() {
-    socket.send(JSON.stringify({
-      "type": "PING"
-    }));
-  }, 240000);
+	setInterval(function() {
+		socket.send(JSON.stringify({
+			"type": "PING"
+		}));
+	}, 240000);
 
 	// Ws OnClose : try reconnect
 	socket.onclose = function() {
 		socket = null;
-    console.error('Channel Point Websocket Closed');
+		console.error('Twitch Pubsub Websocket Closed');
 	};
 
 	// WS OnMessage event : handle events

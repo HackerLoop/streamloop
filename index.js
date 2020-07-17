@@ -103,11 +103,11 @@ var server = http.listen(PORT, () => {
 // Do stuff
 require('./js/controller.js');
 require('./js/streamElementsAlert/streamElementsAlertHandler');
-require('./js/channelPoint/channelPointHandler');
+require('./js/twitch/twitchHandler');
 require('./js/chat/chatHandler');
 
 // OnChannelPoint "Recompense 2"
-var parser = controller.getParser('ChannelPoint');
+var parser = controller.getParser('Twitch');
 if (parser) {
   var channelPointName = process.env.NODE_ENV !== 'production' ? 'Recompense 1': "Du bouche-à-bouche pour Serge !";
 
