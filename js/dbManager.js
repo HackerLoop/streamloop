@@ -29,7 +29,7 @@ event
     db = client.db();
     Widgets = db.collection('widgets');
     Events = db.collection('events');
-    console.log("mongodb Connected");
+    console.log("mongodb Connected", mongoDBurl);
     // Users.findOne({}, function(err, result) {
     //   if (err) throw err;
     //   console.log(result);

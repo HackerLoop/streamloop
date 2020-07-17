@@ -262,11 +262,11 @@ async function triggerSerge(timer) {
 async function tpLinkConnect() {
   // log in to cloud, return a connected tplink object
   tplink = await login(TPLINK_USER, TPLINK_PASS, TPLINK_TERM);
-  console.log("tpLink Connected, current auth token is", tplink.getToken());
+  console.log("tpLink "+TPLINK_USER+" Connected, current auth token is", tplink.getToken());
 
   // get a list of raw json objects (must be invoked before .get* works)
   const dl = await tplink.getDeviceList();
-  console.log(dl);
+  console.log("TP Link device list", dl);
 
   // find a device by alias:
   //myPlug = tplink.getHS100("Serge");

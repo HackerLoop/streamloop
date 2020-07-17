@@ -27,6 +27,7 @@ exports.connect = function(streamElementHandler, token, onEvent) {
 
   // Socket is authenticated
   socket.on('authenticated', function(data) {
+    console.log(data);
     const channelId = data.channelId;
     console.log(`Successfully connected to channel ${channelId}`);
   });

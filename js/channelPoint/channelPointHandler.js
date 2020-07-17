@@ -102,7 +102,7 @@ class ChannelPointHandler extends Handler {
 function channelPointHandlerExport() {
   var channelPoint = new ChannelPointHandler();
   Utils.readFile('settings/channelpoints-user.txt', function(user) {
-    Utils.getIdFromUser(user.trim(), function (id) {
+    Utils.getIdFromUser(process.env.TWITCH_USER || user.trim(), function (id) {
       channelPoint.init(id);
     })
   });

@@ -67,7 +67,7 @@ class StreamElementsAlertHandler extends Handler {
    * @param {Object} message streamelements event message
    */
   onStreamElementsMessage(message) {
-    //console.log("MSG", message);
+    console.log("MSG", message);
     var type = message.listener;
     if (type === 'subscriber-latest') {
       if (message.event.gifted) {
@@ -191,7 +191,7 @@ class StreamElementsAlertHandler extends Handler {
 function streamElementsAlertHandlerExport() {
   var streamElementsAlert = new StreamElementsAlertHandler();
   Utils.readFile('settings/streamelements-jwtToken.txt', function(id) {
-    streamElementsAlert.init(id.trim());
+    streamElementsAlert.init(process.env.SE_TOKEN || id.trim());
   });
 }
 streamElementsAlertHandlerExport();
