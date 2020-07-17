@@ -27,6 +27,8 @@ exports.connect = function(channelId, onMessage) {
 		};
 		// Send authentication payload to Streamlabs Chatbot
 		socket.send(JSON.stringify(auth));
+
+		console.log(`Successfully connected to ${process.env.TWITCH_USER} Twitch websocket`);
 	};
 
 	setInterval(function() {

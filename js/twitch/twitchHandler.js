@@ -199,7 +199,7 @@ class TwitchHandler extends Handler {
  */
 function twitchHandlerExport() {
   var channelPoint = new TwitchHandler();
-  Utils.getIdFromUser(process.env.TWITCH_USER || user.trim(), function (id) {
+  Utils.getIdFromUser(process.env.TWITCH_USER, function (id) {
     channelPoint.init(id);
   })
 }

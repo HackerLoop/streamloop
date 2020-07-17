@@ -38,6 +38,7 @@ class ChatHandler extends Handler {
     ComfyJS.onConnected = ( address, port, isFirstConnect ) => {
       if (isFirstConnect) {
         this.success();
+        console.log(`Successfully connected to ${user} Twitch Chat`);
       }
     }
     if (user) {

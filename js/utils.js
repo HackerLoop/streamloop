@@ -47,23 +47,48 @@ exports.readFile = function(file, callback) {
  * @param {function} callback function to call with file data
  */
 exports.getIdFromUser = function(user, callback) {
-  // $.ajax({
-  //   url: 'https://decapi.me/twitch/id/' + user,
-  //   type: 'GET',
-  //   dataType: 'text',
-  //   success: function(data) {
-  //     callback(data);
-  //   },
-  //   error: function(data) {
-  //     console.error(`Error getting the user id for ${user}! Please double-check that your user is spelled correctly.`);
-  //   }
-  // });
   axios.get('https://decapi.me/twitch/id/' + user)
     .then(response => {
       callback(response.data);
     })
     .catch(error => {
       console.error(`Error getting the user id for ${user}! Please double-check that your user is spelled correctly.`, error);
+    });
+}
+
+/**
+ * Get the streamelements channel data and send to the callback.
+ * @param {string} channel_id id channel
+ * @param {function} callback function to call with file data
+ */
+exports.getSEChannelDataFromId = function(channel_id, callback) {
+
+  axios.get('https://api.streamelements.com/kappa/v2/channels/' + channel_id)
+    .then(response => {
+      callback(response.data);
+    })
+    .catch(error => {
+      console.error(`Error getting the channel data for ${channel_id}! Please double-check that your channel id is spelled correctly.`, error);
+    });
+}
+
+/**
+ * Get Twitch Channel data and send to the callback.
+ * @param {string} channel_id id channel
+ * @param {function} callback function to call with file data
+ */
+exports.getTwitchChannelDataFromId = function(channel_id, callback) {
+
+  axios.get('https://api.twitch.tv/kraken/channel' + channel_id, {
+    headers: {
+      'Client-ID': process.env.TWITCH_CLIENT_ID
+    }
+  })
+    .then(response => {
+      callback(response.data);
+    })
+    .catch(error => {
+      console.error(`Error getting the channel data for ${channel_id}! Please double-check that your channel id is spelled correctly.`, error);
     });
 }
 

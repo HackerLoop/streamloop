@@ -30,7 +30,10 @@ exports.connect = function(streamElementHandler, token, onTestEvent, onEvent) {
   // Socket is authenticated
   socket.on('authenticated', function(data) {
     const channelId = data.channelId;
-    console.log(`Successfully connected to channel ${channelId}`);
+    console.log(`Successfully connected to streamelements channel ${channelId}`);
+    Utils.getSEChannelDataFromId(channelId, (data) => {
+      console.log(`Streamelements channel ${data.displayName}`);
+    });
   });
 
   socket.on('event:test', onTestEvent);
