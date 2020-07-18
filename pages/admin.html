@@ -155,7 +155,9 @@
                   </div>
                   <div class="card-content">
                     <div class="content">
-                      {{item.url.substring(item.url.lastIndexOf('/')+1)}}
+                      <a target="_blank" :href="item.url">
+                        {{item.url.substring(item.url.lastIndexOf('/')+1)}}
+                      </a>
                       <br>
                       <br>
                       <div v-if="widgetsData[1].revealed.includes(item.asset_id)">

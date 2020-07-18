@@ -185,7 +185,9 @@ controller.runInit();
 const cloudinary = require('cloudinary').v2;
 
 async function getResources() {
-  var images, videos;
+  var images = videos = {
+    resources: []
+  };
   images = await cloudinary.api.resources({
     resource_type: 'image',
     type: "upload",
@@ -196,15 +198,15 @@ async function getResources() {
     images.resources = [];
   });
 
-  videos = await cloudinary.api.resources({
-    resource_type: 'video',
-    type: "upload",
-    prefix: "TwitchPhotosDossier/",
-    max_results: 500
-  }).catch(e => {
-    console.log(`Error: ${e.error.message}`);
-    videos.resources = [];
-  });
+  // videos = await cloudinary.api.resources({
+  //   resource_type: 'video',
+  //   type: "upload",
+  //   prefix: "TwitchPhotosDossier/",
+  //   max_results: 500
+  // }).catch(e => {
+  //   console.log(`Error: ${e.error.message}`);
+  //   videos.resources = [];
+  // });
 
   var result = [...images.resources, ...videos.resources].sort((a, b) => (a.created_at > b.created_at) ? -1 : 1);
 
