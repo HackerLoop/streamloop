@@ -8,124 +8,129 @@
 </head>
 <body>
   <div id="app">
-    <div class="container" v-if="dossierImg">
+    <!-- <div class="container" v-if="dossierImg">
       <img class="chest" v-bind:src="chestImg">
       <img class="dossierImg" v-bind:src="dossierImg" />
       <video id="myVideo" class="dossierVideo" v-bind:src="dossierVideo" autoplay></video>
+    </div> -->
+    <div class="alert animated" v-bind:class="[status]" v-show="dossier && isPlaying">
+      <img class="chest" v-bind:src="chestImg" alt="">
+      <img id="myDossier" class="dossier"
+        v-bind:src="dossier.url"
+        v-show="dossier.resource_type == 'image'" />
+      <video id="myVideo" class="dossier"
+        v-show="dossier.resource_type == 'video'"
+        v-bind:src="dossier.url" autoplay></video>
     </div>
-    <!-- <div class="container">
+    <!-- <div class="alert animated animationIn">
       <img class="chest" src="/assets/treasurechest.gif" alt="">
-      <img class="dossierImg" src="http://res.cloudinary.com/dcr72h6g0/image/upload/v1593649321/test/giphy_oqseh7.gif" />
-      <video id="myVideo" class="dossierVideo" src="https://res.cloudinary.com/hzim7siiy/video/upload/v1594890742/TwitchPhotosDossier/coverr-sample076-2660_zobaej.mp4" autoplay></video>
+      <img class="dossier" src="http://res.cloudinary.com/hzim7siiy/image/upload/v1594897290/TwitchPhotosDossier/mlz4o6nvldyorwcpaqiy.jpg" />
+      <video id="myVideo" class="dossier" src="http://res.cloudinary.com/hzim7siiy/video/upload/v1594895508/TwitchPhotosDossier/iigzcbfpret6bhbpy9vv.mp4" autoplay></video>
     </div> -->
   </div>
 </body>
 
 <script>
-let goal, fieldData;
-
-let botPoints = 0;
-let sessionData;
+let queue = [];
 
 var timer;
 
 let audio = new Audio('/assets/sfx/master-sword.mp3');
 audio.volume = 1;
 
-var socket = io('', {query: "user=hackerloop"});
+var socket = io('', {query: "user=camillelv"});
 var app = new Vue({
   el: '#app',
   data: {
-    goal: 0,
-    count: 0,
     duration: 0,
-    alertMessage: "",
-    alertImg: "",
-    events: {},
-    dossierImg: "",
-    dossierVideo: "",
-    chestImg: ""
+    dossier: {},
+    isPlaying: false,
+    chestImg: '',
+    status: 'animationIn'
   },
   created () {
-    /*
-    socket.on('EVENT', (obj) => {
-      console.log(obj);
-      if (obj.listener == "OnSEDonation") {
-        this.alertMessage = obj.event.user + " donate " + obj.event.amount.toLocaleString(undefined,{style: 'currency',currency:"EUR"});
-
-        axios.get('https://decapi.me/twitch/avatar/'+obj.event.user)
-        .then((response) => {
-          console.log(response.data);
-          if(response.data.startsWith('http')) {
-            this.alertImg = response.data;
-            // setTimeout(() => {
-            //   this.alertImg = "";
-            //   this.alertMessage = "";
-            // }, 10000);
-          }
-          else {
-            console.log(response);
-            this.alertImg = 'https://static-cdn.jtvnw.net/jtv-static/404_preview-300x300.png';
-          }
-        })
-      }
-    });
-    */
 
     socket.on('WIDGETS_DATA', (obj) => {
       var data = obj.find(elem => {
         return elem.name == "dossier"
       })
       console.log(data);
-      this.goal = data.goal;
-      this.count = data.count;
       this.duration = data.duration;
     });
 
-    socket.on('EVENT_LIST', (obj) => {
-      var data = obj.filter(elem => {
-        return elem.listener == "OnSEDonation"
-      })
-      console.log(data);
-      this.events = data;
-    });
-
     socket.on('EVENT_DOSSIER', (obj) => {
-      if (obj.resource_type == "image") {
-        this.dossierImg = obj.url;
-        this.chestImg = '/assets/treasurechest.gif';
-        audio.play();
-        clearTimeout(timer);
-        var timer = setTimeout(() => {
-          this.dossierImg = "";
-          this.chestImg = "";
-          this.dossierVideo = "";
-        }, this.duration*1000);
-      }
-      if (obj.resource_type == "video") {
-        clearTimeout(timer);
-        this.dossierVideo = obj.url;
-        this.chestImg = '/assets/treasurechest.gif';
-        audio.play();
-      }
+      console.log(obj);
+      queue.push(obj);
+      this.playEvent();
     });
 
-    document.getElementById('myVideo').addEventListener('ended',myHandler,false);
+    // document.getElementById('myVideo').addEventListener('ended',myHandler,false);
+
     function myHandler(e) {
-      this.dossierImg = "";
-      this.dossierVideo = "";
-      this.chestImg = "";
+      // this.dossierImg = "";
+      // this.dossierVideo = "";
+      // this.chestImg = "";
     }
   },
 
   computed: {
-    lastEvent() {
-      return this.events.slice(-1)[0]
-    }
+
   },
 
   methods: {
+    playEvent() {
+      if (this.isPlaying) {
+        console.log('Alert is still playing');
+        return;
+      }
 
+      if (!queue.length) {
+        console.log('queue is empty');
+        return;
+      }
+
+      const event = queue.shift();
+
+      this.dossier = event;
+      this.chestImg = '/assets/treasurechest.gif';
+
+      document.getElementById('myDossier').addEventListener('load', () => {
+        console.log("img loaded");
+        this.playAlert(event);
+      })
+
+      document.getElementById('myVideo').addEventListener('loadeddata', () => {
+        console.log("video loaded");
+        this.playAlert(event);
+      }, false);
+
+    },
+
+    playAlert(event) {
+
+      audio.play();
+      this.isPlaying = true;
+
+      this.status = 'animationIn';
+
+      var videoDuration = event.video_duration || 0;
+      const duration = videoDuration || this.duration;
+      console.log("duration", duration);
+
+      setTimeout(() => {
+        this.status = 'animationOut';
+      }, (duration) * 1000);
+      setTimeout(() => {
+        console.log('Alert is done playing');
+        this.dossier = {};
+        this.chestImg = "";
+        this.isPlaying = false;
+        this.isLoad = false;
+        setTimeout(() => {
+          this.playEvent();
+        }, 1000);
+      }, (duration+1) * 1000);
+    }
   }
 })
 </script>
@@ -140,7 +145,54 @@ var app = new Vue({
     padding: 0;
   }
 
-  .alertImg {
+  .alert {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 100vh;
+    justify-content: center;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+  }
+
+    .alert .chest {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translateX(-50%) translateY(-50%);
+      /* animation: 1s ease-out 0s 1 chestIn; */
+    }
+
+    .alert .dossier {
+      position: absolute;
+      display: inline-block;
+      width: 90%;
+      height: 90%;
+      object-fit: contain;
+      z-index: 1;
+      /* animation: 2s ease-out 0s 1 imgZoom; */
+    }
+
+    .animationIn .chest {
+      animation: 1s ease-out 0s 1 fadeIn;
+    }
+
+    .animationIn .dossier {
+      animation: 2s ease-out 0s 1 zoomIn;
+    }
+
+    .animationOut .chest {
+      opacity: 0;
+    }
+
+    .animationOut .dossier {
+      animation: 1.2s ease-out 0s 1 fadeOut;
+    }
+
+  /* OLD */
+
+  .container .alertImg {
     width: 100px;
     height: auto;
   }
@@ -156,7 +208,41 @@ var app = new Vue({
     display: flex;
   }
 
-  @keyframes imgZoom {
+
+  .container .dossierImg {
+    display: inline-block;
+    width: 600px;
+    height: auto;
+    width: 90%;
+    height: 90%;
+    object-fit: contain;
+    /* transition: all 1s ease-out; */
+    z-index: 1;
+    animation: 2s ease-out 0s 1 imgZoom;
+  }
+
+  .container .dossierVideo {
+    position: absolute;
+    display: inline-block;
+    width: 600px;
+    height: auto;
+    width: 90%;
+    height: 90%;
+    object-fit: contain;
+    /* transition: all 1s ease-out; */
+    z-index: 1;
+    animation: 2s ease-out 0s 1 imgZoom;
+  }
+
+  .container .chest {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    animation: 1s ease-out 0s 1 chestIn;
+  }
+
+  @keyframes zoomIn {
     0% {
       width: 0%;
       height: 0%;
@@ -174,7 +260,7 @@ var app = new Vue({
     }
   }
 
-  @keyframes chestIn {
+  @keyframes fadeIn {
     0% {
       opacity: 0;
     }
@@ -183,38 +269,15 @@ var app = new Vue({
     }
   }
 
-  .dossierImg {
-    display: inline-block;
-    width: 600px;
-    height: auto;
-    width: 90%;
-    height: 90%;
-    object-fit: contain;
-    /* transition: all 1s ease-out; */
-    z-index: 1;
-    animation: 2s ease-out 0s 1 imgZoom;
+  @keyframes fadeOut {
+    0% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
   }
 
-  .dossierVideo {
-    position: absolute;
-    display: inline-block;
-    width: 600px;
-    height: auto;
-    width: 90%;
-    height: 90%;
-    object-fit: contain;
-    /* transition: all 1s ease-out; */
-    z-index: 1;
-    animation: 2s ease-out 0s 1 imgZoom;
-  }
-
-  .chest {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translateX(-50%) translateY(-50%);
-    animation: 1s ease-out 0s 1 chestIn;
-  }
 </style>
 
 </html>

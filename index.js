@@ -63,6 +63,10 @@ admin.on('connection', function (socket) {
     admin.emit('DOSSIER_LIST', data);
   })
 
+  socket.on('TEST_DOSSIER', function(type) {
+    testDossier(type);
+  });
+
   //admin.emit('message1', 'Message1: admin to admin');
   //client.emit('message1', 'Message1: admin to client');
 });
@@ -184,6 +188,16 @@ controller.runInit();
 
 const cloudinary = require('cloudinary').v2;
 
+const clientAllowedFormats = [
+  "png",
+  "gif",
+  "jpeg",
+  "jpg",
+  "mp4",
+  "m4v",
+  "webm"
+];
+
 async function getResources() {
   var images = videos = {
     resources: []
@@ -191,6 +205,7 @@ async function getResources() {
   images = await cloudinary.api.resources({
     resource_type: 'image',
     type: "upload",
+    image_metadata: true,
     prefix: "TwitchPhotosDossier/",
     max_results: 500
   }).catch(e => {
@@ -198,34 +213,71 @@ async function getResources() {
     images.resources = [];
   });
 
-  // videos = await cloudinary.api.resources({
-  //   resource_type: 'video',
-  //   type: "upload",
-  //   prefix: "TwitchPhotosDossier/",
-  //   max_results: 500
-  // }).catch(e => {
-  //   console.log(`Error: ${e.error.message}`);
-  //   videos.resources = [];
-  // });
+  videos = await cloudinary.api.resources({
+    resource_type: 'video',
+    type: "upload",
+    image_metadata: true,
+    prefix: "TwitchPhotosDossier/",
+    max_results: 500
+  })
+  .then(res => {
+    let ids = res.resources.map(asset => asset.public_id);
+    return Promise.all(
+      ids.map(id => {
+        return cloudinary.api.resource(id, {
+          image_metadata: true,
+          resource_type: "video"
+        }).then(values => {
+          //console.log(values);
+          //delete values.derived;
+          return values;
+        });
+      }))
+      .then(values => {
+        return values;
+      });
+  })
+  .catch(e => {
+    console.log(`Error: ${e.error.message}`);
+    videos = [];
+  });
 
-  var result = [...images.resources, ...videos.resources].sort((a, b) => (a.created_at > b.created_at) ? -1 : 1);
+  // console.log(videos);
+
+  // Get only video with supported Formats
+  var safeVideos = videos.filter(elem => {
+    return clientAllowedFormats.includes(elem.format);
+  });
+
+  var result = [...images.resources, ...safeVideos].sort((a, b) => (a.created_at > b.created_at) ? -1 : 1);
 
   return result;
 }
 
-function revealDossier(data) {
-  // getResources().then((data) => {
-  //   lol
-  // })
-  cloudinary.api.resources({
-      resource_type: 'image',
-      type: 'upload',
-      prefix: 'TwitchPhotosDossier/'
-    },
-    function(error, result) {
-      if (error) {
-        console.log(error);
+function testDossier(type) {
+  console.log("testDossier");
+  getResources()
+    .then((result) => {
+      if (result) {
+        var remaining = result.filter(elem => {
+          return elem.resource_type == type;
+        });
+
+        var item = remaining[Math.floor(Math.random() * remaining.length)];
+
+        if (item) {
+          io.sockets.emit("EVENT_DOSSIER", item);
+        }
       }
+    })
+    .catch(e => {
+      console.log(e);
+    });
+}
+
+function revealDossier(data) {
+  getResources()
+    .then((result) => {
       if (result) {
         console.log(result);
 
@@ -251,50 +303,13 @@ function revealDossier(data) {
         else {
           console.log("no random item found in remaining dossier !");
         }
-        // cloudinary.api.resources({
-        //     resource_type: 'video',
-        //     type: 'upload',
-        //     prefix: 'TwitchPhotosDossier/'
-        //   },
-        //   function(error, resultVideos) {
-        //     if (error) {
-        //       console.log(error);
-        //     }
-        //     if (resultVideos) {
-        //       Array.prototype.push.apply(result.resources, resultVideos.resources);
-        //       //result.resources.push();
-        //       console.log(result);
-        //
-        //       var remaining = result.resources.filter(elem => {
-        //         return !data.revealed.includes(elem.asset_id);
-        //       });
-        //       if (remaining.length <= 0) {
-        //         // remaining = result.resources;
-        //         // data.revealed = [];
-        //         console.log("no more 'dossier'!");
-        //       }
-        //
-        //       var item = remaining[Math.floor(Math.random() * remaining.length)];
-        //
-        //       if (item) {
-        //         console.log("item", item);
-        //
-        //         io.sockets.emit("EVENT_DOSSIER", item);
-        //
-        //         data.revealed.push(item.asset_id);
-        //         dbManager.updateWidgetData(data);
-        //       }
-        //       else {
-        //         console.log("no random item found in remaining dossier !");
-        //       }
-        //     }
-        //   }
-        // );
+
 
       }
-    }
-  );
-
+    })
+    .catch(e => {
+      console.log(e);
+    });
 }
 
 const { login } = require("tplink-cloud-api");

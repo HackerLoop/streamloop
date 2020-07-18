@@ -129,12 +129,15 @@
               </table>
 
               <button class="button is-primary" type="submit">Mettre à jour</button>
+              <button class="button is-primary" type="button" @click="testDossier('image')">Tester Image</button>
+              <button class="button is-primary" type="button" @click="testDossier('video')">Tester Video</button>
             </form>
           </div>
           <br>
           <br>
           <div class="container">
             <button id="upload_widget" class="cloudinary-button" @click="showWidget">Ajouter des images</button>
+            <p>(Formats de fichier autorisé: .png, .gif, .jpeg, .jpg, .mp4, .webm)</p>
             <br>
             <br>
             <div class="dossierGallery columns is-multiline">
@@ -146,15 +149,17 @@
                   <div class="card-image">
                     <figure class="image is-3by2">
                       <img :src="item.url" v-if="item.resource_type == 'image'">
-                      <!-- <img src="https://bulma.io/images/placeholders/256x256.png" v-if="item.resource_type == 'video'"> -->
-                      <video controls v-if="item.resource_type == 'video'">
+                      <img :src="item.derived[0].url" v-if="item.resource_type == 'video'">
+                      <!-- <video controls v-if="item.resource_type == 'video'">
                         <source :src="item.url" type="video/mp4">
                         Your browser does not support the video tag.
-                      </video>
+                      </video> -->
+
                     </figure>
                   </div>
                   <div class="card-content">
                     <div class="content">
+                      <span class="tag">{{item.url.split('.').pop()}}</span>
                       <a target="_blank" :href="item.url">
                         {{item.url.substring(item.url.lastIndexOf('/')+1)}}
                       </a>
@@ -218,7 +223,15 @@
       this.myWidget = window.cloudinary.createUploadWidget({
         cloudName: 'hzim7siiy',
         uploadPreset: 'vsmheyev',
-        folder: "TwitchPhotosDossier"
+        folder: "TwitchPhotosDossier",
+        clientAllowedFormats: [
+          "png",
+          "gif",
+          "jpeg",
+          "jpg",
+          "mp4",
+          "webm"
+        ]
       }, (error, result) => {
           if (!error && result && result.event === "success") {
             console.log('Done! Here is the image info: ', result.info);
@@ -273,7 +286,11 @@
       },
 
       testSerge(duration) {
-        socket.emit('TEST_SERGE', duration);
+        // socket.emit('TEST_SERGE', duration);
+      },
+
+      testDossier(type) {
+        adminSocket.emit('TEST_DOSSIER', type);
       }
     }
   })
