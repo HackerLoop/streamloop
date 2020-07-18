@@ -10,101 +10,172 @@
   <script src="/socket.io/socket.io.js"></script>
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.0/css/bulma.min.css">
+  <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
 </head>
 <body>
   <div id="app">
-    <div class="users container" v-if="widgetsData[0]">
-      <h1 class="title is-4">Overlay {{widgetsData[0].name}}</h1>
-      <a target="_blank" href="/overlay/camillelv/serge-bar">Progress Bar</a>
-      <br>
-      <a target="_blank" href="/overlay/camillelv/serge-alert">Alert</a>
-      <br>
-      <!-- <button type="button" @click="testSerge(widgetsData[0].duration)">Test pompe Serge</button>
-      <br> -->
-      <br>
-      <form v-on:submit.prevent="updateWidget(0)">
-        <table class="table is-bordered is-striped">
-          <tr>
-            <th>name</th>
-            <th>step goal</th>
-            <th>max</th>
-            <th>count</th>
-            <th>offset</th>
-            <th>duration (s)</th>
-          </tr>
-          <tr>
-            <td>{{widgetsData[0].name}}</td>
-            <td><input type="number" v-model.number="widgetsData[0].goal"></td>
-            <td><input type="number" v-model.number="widgetsData[0].max"></td>
-            <td><input type="number" v-model.number="widgetsData[0].count"></td>
-            <td><input type="number" v-model.number="widgetsData[0].offset"></td>
-            <td><input type="number" v-model.number="widgetsData[0].duration"></td>
-          </tr>
-        </table>
-        <button type="submit">Update Widget</button>
-        <button type="button" @click="resetMichelCounter(0)">Reset counter</button>
-      </form>
-    </div>
-    <br>
-    <br>
+    <!-- <div class="navbar">
+      <div class="container"></div>
+    </div> -->
+    <div class="main">
+      <div class="container columns">
+        <div class="column activity">
+          <h1 class="title is-4">Activités</h1>
+          <ul class="activity-list">
+            <li class="activity-item" v-for="item in events.slice().reverse()" :key="item.asset_id">
+              <!-- {{item}} -->
+              <div class="" v-if="item.listener == 'OnChannelPoint'">
+                {{item.event.data.redemption.user.display_name}}
+                a récupéré :
+                {{item.event.data.redemption.reward.title}}
+                <br>
+                <span class="tag">{{item.event.data.timestamp}}</span>
+              </div>
+              <div class="" v-else-if="item.listener == 'OnSEDonation'">
+                <p>
+                  {{item.event.data.name}}
+                  a donné :
+                  {{item.event.data.amount}} €
+                </p>
+                <p class="content is-small">{{item.event.data.message}}</p>
 
-    <div class="users container" v-if="widgetsData[1]">
-      <h1 class="title is-4">Overlay {{widgetsData[1].name}}</h1>
-      <a target="_blank" href="/overlay/camillelv/dossier-bar">Progress Bar</a>
-      <br>
-      <a target="_blank" href="/overlay/camillelv/dossier-alert">Alert</a>
-      <br>
-      <br>
-      <form v-on:submit.prevent="updateWidget(1)">
-        <table class="table is-bordered is-striped">
-          <tr>
-            <th>name</th>
-            <th>goal</th>
-            <th>count</th>
-            <th>duration (s)</th>
-            <th>revealed</th>
-          </tr>
-          <tr>
-            <td>{{widgetsData[1].name}}</td>
-            <td><input type="number" v-model.number="widgetsData[1].goal"></td>
-            <td><input type="number" v-model.number="widgetsData[1].count"></td>
-            <td><input type="number" v-model.number="widgetsData[1].duration"></td>
-            <td>{{widgetsData[1].revealed}}</td>
-          </tr>
-        </table>
-        <button type="submit">Update Widget</button>
-        <button type="button" @click="resetDossierCounter(1)">Reset counter</button>
-        <button type="button" @click="resetDossierRevealed(1)">Reset revealed</button>
-      </form>
-    </div>
-    <br>
-    <br>
-    <div class="users container">
-      <button id="upload_widget" class="cloudinary-button" @click="showWidget">Upload files</button>
-    </div>
-    <br>
-    <div class="dossierGallery columns is-multiline">
-      <div class="column is-one-quarter" v-for="item in resourcesGallery" :key="item.asset_id">
-        <div class="card">
-          <div class="card-image">
-            <figure class="image is-3by2">
-              <img :src="item.url" v-if="item.resource_type == 'image'">
-              <!-- <img src="https://bulma.io/images/placeholders/256x256.png" v-if="item.resource_type == 'video'"> -->
-            </figure>
+              </div>
+              <div v-else>
+                {{item.listener}}
+              </div>
+            </li>
+          </ul>
+        </div>
+        <div class="column is-three-quarters">
+          <div class="container" v-if="widgetsData[0]">
+            <h1 class="title is-4">Serge</h1>
+            <a target="_blank" href="/overlay/camillelv/serge-bar">
+              <span class="icon has-text-info">
+                <i class="fas fa-link"></i>
+              </span>
+              Overlay Barre de progression</a>
+            <br>
+            <a target="_blank" href="/overlay/camillelv/serge-alert">
+              <span class="icon has-text-info">
+                <i class="fas fa-link"></i>
+              </span>
+              Overlay Alert</a>
+            <br>
+            <!-- <button type="button" @click="testSerge(widgetsData[0].duration)">Test pompe Serge</button>
+            <br> -->
+            <br>
+            <button class="button is-warning" type="button" @click="resetMichelCounter(0)">Réinitialiser progression</button>
+            <br><br>
+            <form v-on:submit.prevent="updateWidget(0)">
+              <table class="table is-bordered is-striped">
+                <tr>
+                  <!-- <th>name</th> -->
+                  <th>Palier</th>
+                  <th>Objectif</th>
+                  <th>Progression</th>
+                  <!-- <th>offset</th> -->
+                  <th>Durée d'activation de la pompe (s)</th>
+                </tr>
+                <tr>
+                  <!-- <td>{{widgetsData[0].name}}</td> -->
+                  <td><input type="number" v-model.number="widgetsData[0].goal"></td>
+                  <td><input type="number" v-model.number="widgetsData[0].max"></td>
+                  <td><input type="number" v-model.number="widgetsData[0].count"></td>
+                  <!-- <td><input type="number" v-model.number="widgetsData[0].offset"></td> -->
+                  <td><input type="number" v-model.number="widgetsData[0].duration"></td>
+                </tr>
+              </table>
+              <button class="button is-primary" type="submit">Mettre à jour</button>
+            </form>
           </div>
-          <div class="card-content">
-            <div class="content">
-              {{item.url.substring(item.url.lastIndexOf('/')+1)}}
-              <div v-if="widgetsData[1].revealed.includes(item.asset_id)">
-                <span class="tag is-link is-normal">revealed</span>
-                <button type="button" @click="cancelDossierRevealed(item.asset_id)">Reset</button>
+          <br>
+          <br>
+
+          <div class="container" v-if="widgetsData[1]">
+            <h1 class="title is-4">Machine à {{widgetsData[1].name}}</h1>
+            <a target="_blank" href="/overlay/camillelv/dossier-bar">
+              <span class="icon has-text-info">
+                <i class="fas fa-link"></i>
+              </span>
+              Overlay Barre de progression</a>
+            <br>
+            <a target="_blank" href="/overlay/camillelv/dossier-alert">
+              <span class="icon has-text-info">
+                <i class="fas fa-link"></i>
+              </span>
+              Overlay Alert</a>
+            <br>
+            <br>
+            <button class="button is-warning" type="button" @click="resetDossierCounter(1)">Réinitialiser progression</button>
+            <button class="button is-warning" type="button" @click="resetDossierRevealed(1)">Réinitialiser toutes les images révélé</button>
+            <br>
+            <br>
+            <form v-on:submit.prevent="updateWidget(1)">
+              <table class="table is-bordered is-striped">
+                <tr>
+                  <!-- <th>name</th> -->
+                  <th>Objectif</th>
+                  <th>Progression</th>
+                  <th>Durée d'affichage (s)</th>
+                  <!-- <th>revealed</th> -->
+                </tr>
+                <tr>
+                  <!-- <td>{{widgetsData[1].name}}</td> -->
+                  <td><input type="number" v-model.number="widgetsData[1].goal"></td>
+                  <td><input type="number" v-model.number="widgetsData[1].count"></td>
+                  <td><input type="number" v-model.number="widgetsData[1].duration"></td>
+                  <!-- <td>{{widgetsData[1].revealed}}</td> -->
+                </tr>
+              </table>
+
+              <button class="button is-primary" type="submit">Mettre à jour</button>
+            </form>
+          </div>
+          <br>
+          <br>
+          <div class="container">
+            <button id="upload_widget" class="cloudinary-button" @click="showWidget">Upload files</button>
+            <br>
+            <br>
+            <div class="dossierGallery columns is-multiline">
+              <div class="column is-one-quarter" v-for="item in resourcesGallery" :key="item.asset_id">
+                <div
+                  class="card"
+                  v-bind:class="{ revealed: widgetsData[1].revealed.includes(item.asset_id) }"
+                >
+                  <div class="card-image">
+                    <figure class="image is-3by2">
+                      <img :src="item.url" v-if="item.resource_type == 'image'">
+                      <!-- <img src="https://bulma.io/images/placeholders/256x256.png" v-if="item.resource_type == 'video'"> -->
+                      <video controls v-if="item.resource_type == 'video'">
+                        <source :src="item.url" type="video/mp4">
+                        Your browser does not support the video tag.
+                      </video>
+                    </figure>
+                  </div>
+                  <div class="card-content">
+                    <div class="content">
+                      {{item.url.substring(item.url.lastIndexOf('/')+1)}}
+                      <br>
+                      <br>
+                      <div v-if="widgetsData[1].revealed.includes(item.asset_id)">
+                        <span class="tag is-link is-normal">Révélé</span>
+                        <button class="button is-small is-warning" type="button" @click="cancelDossierRevealed(item.asset_id)">Annuler</button>
+                      </div>
+                      <div v-else>
+                        <button class="button is-small is-light" type="button" @click="addDossierRevealed(item.asset_id)">Marquer révélé</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
+
         </div>
       </div>
     </div>
-    <br>
+
 
   </div>
 </body>
@@ -119,7 +190,8 @@
       message: 'Hello Vue!',
       widgetsData: [],
       myWidget: null,
-      resourcesGallery: []
+      resourcesGallery: [],
+      events: []
     },
     created () {
       window.onbeforeunload = () => {
@@ -129,6 +201,11 @@
       socket.on('WIDGETS_DATA', (obj) => {
         this.widgetsData = obj;
         console.log(obj);
+      });
+
+      socket.on('EVENT_LIST', (obj) => {
+        console.log(obj);
+        this.events = obj;
       });
 
       adminSocket.on('DOSSIER_LIST', (obj) => {
@@ -184,6 +261,11 @@
         socket.emit('UPDATE_WIDGET', this.widgetsData[1]);
       },
 
+      addDossierRevealed(id) {
+        this.widgetsData[1].revealed.push(id);
+        socket.emit('UPDATE_WIDGET', this.widgetsData[1]);
+      },
+
       showWidget(widget) {
         this.myWidget.open();
       },
@@ -198,6 +280,7 @@
 <style lang="scss" scoped>
   #app {
     padding: 20px;
+    /* background-color: rgb(51, 51, 68); */
   }
   .users .table td {
     max-width: 200px;
@@ -210,8 +293,33 @@
     display: flex;
     background-color: black;
   }
-  .dossierGallery .card-image .image img {
+  .dossierGallery .card-image .image img,
+  .dossierGallery .card-image .image video {
     object-fit: contain;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+
+  .revealed .card-image {
+    opacity: .3;
+  }
+
+  .activity-list {
+    max-height: calc(100vh - 70px);
+    overflow: auto;
+  }
+
+    .activity-item {
+      border-top: 2px solid #ddd;
+      padding: 10px 0;
+    }
+
+  .content {
+    text-overflow: ellipsis;
+    overflow: hidden;
   }
 </style>
 

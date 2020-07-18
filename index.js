@@ -185,17 +185,18 @@ controller.runInit();
 const cloudinary = require('cloudinary').v2;
 
 async function getResources() {
-  var images = await cloudinary.api.resources({
+  var images, videos;
+  images = await cloudinary.api.resources({
     resource_type: 'image',
     type: "upload",
     prefix: "TwitchPhotosDossier/",
     max_results: 500
   }).catch(e => {
-    console.log(`Error: ${e.error.message}`);
+    console.log(`Error: ${e.error}`);
     images.resources = [];
   });
 
-  var videos = await cloudinary.api.resources({
+  videos = await cloudinary.api.resources({
     resource_type: 'video',
     type: "upload",
     prefix: "TwitchPhotosDossier/",
