@@ -129,8 +129,8 @@ if (parser) {
         .then(data => {
           data.count++;
           if (data.count > data.max) { return false; };
-          if (data.count-data.offset >= data.goal && data.count <= data.max) {
-            data.offset = data.count;
+          var remainder = data.count % data.goal;
+          if (data.count > 0 && remainder == 0 && data.count <= data.max) {
             // do something
             // trigger pump
             console.log("trigger Air Pump !", data.duration+"s");
