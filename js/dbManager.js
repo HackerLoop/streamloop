@@ -42,7 +42,7 @@ event
 const init = async (io) => {
   socketio = io; //we don't care which client is connected because we only broadcast
   try {
-    let eventList = await Events.find().toArray();
+    let eventList = await Events.find().sort( { _id: 1 } ).toArray();
     let widgetsData = await Widgets.find().toArray();
     if (socketio) {
       socketio.emit("EVENT_LIST", eventList);

@@ -22,7 +22,7 @@
         <div class="column activity">
           <h1 class="title is-4">Activités</h1>
           <ul class="activity-list">
-            <li class="activity-item" v-for="item in events.slice().reverse()" :key="item.asset_id">
+            <li class="activity-item" v-for="item in events.slice().reverse().slice(0, 100)" :key="item.asset_id">
               <!-- {{item}} -->
               <div class="" v-if="item.listener == 'OnChannelPoint'">
                 {{item.event.data.redemption.user.display_name}}
@@ -33,7 +33,7 @@
               </div>
               <div class="" v-else-if="item.listener == 'OnSEDonation'">
                 <p>
-                  {{item.event.data.name}}
+                  {{item.event.data.name || item.event.data.username}}
                   a donné :
                   {{item.event.data.amount}} €
                 </p>
