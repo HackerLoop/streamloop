@@ -279,9 +279,9 @@ function revealDossier(data) {
   getResources()
     .then((result) => {
       if (result) {
-        console.log(result);
+        // console.log(result);
 
-        var remaining = result.resources.filter(elem => {
+        var remaining = result.filter(elem => {
           return !data.revealed.includes(elem.asset_id);
         });
         if (remaining.length <= 0) {
