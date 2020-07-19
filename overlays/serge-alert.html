@@ -48,6 +48,11 @@ var app = new Vue({
         this.alertImg = "";
       }, 2400);
     });
+
+    socket.on('RELOAD_OVERLAY', () => {
+      console.log("RELOAD");
+      location.reload();
+    });
   },
 
   computed: {

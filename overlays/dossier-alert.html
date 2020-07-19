@@ -64,6 +64,11 @@ var app = new Vue({
       this.playEvent();
     });
 
+    socket.on('RELOAD_OVERLAY', () => {
+      console.log("RELOAD");
+      location.reload();
+    });
+
     // document.getElementById('myVideo').addEventListener('ended',myHandler,false);
 
     function myHandler(e) {

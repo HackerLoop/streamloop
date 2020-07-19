@@ -79,6 +79,11 @@ var app = new Vue({
       console.log(data);
       this.events = data;
     });
+
+    socket.on('RELOAD_OVERLAY', () => {
+      console.log("RELOAD");
+      location.reload();
+    });
   },
 
   computed: {

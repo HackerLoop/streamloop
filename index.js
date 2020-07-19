@@ -99,6 +99,11 @@ io.on('connection', (socket) => {
   socket.on('TEST_SERGE', (data) => {
     triggerSerge(data);
   });
+
+  socket.on('RELOAD_OVERLAYS', () => {
+    console.log('Reload all Overlays !');
+    io.sockets.emit("RELOAD_OVERLAY");
+  });
 });
 
 var server = http.listen(PORT, () => {

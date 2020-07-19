@@ -61,6 +61,9 @@
               </span>
               Overlay Alert</a>
             <br>
+            <br>
+            <button class="button" type="button" @click="reloadOverlays()">Rafraichire les overlays</button>
+            <br>
             <!-- <button type="button" @click="testSerge(widgetsData[0].duration)">Test pompe Serge</button>
             <br> -->
             <br>
@@ -104,6 +107,9 @@
                 <i class="fas fa-link"></i>
               </span>
               Overlay Alert</a>
+            <br>
+            <br>
+            <button class="button" type="button" @click="reloadOverlays()">Rafraichire les overlays</button>
             <br>
             <br>
             <button class="button is-warning" type="button" @click="resetDossierCounter(1)">Réinitialiser progression</button>
@@ -291,6 +297,10 @@
 
       testDossier(type) {
         adminSocket.emit('TEST_DOSSIER', type);
+      },
+
+      reloadOverlays() {
+        socket.emit('RELOAD_OVERLAYS');
       }
     }
   })

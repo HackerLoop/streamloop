@@ -118,6 +118,11 @@ var app = new Vue({
         this.dossierImg = "";
       }, this.duration);
     });
+
+    socket.on('RELOAD_OVERLAY', () => {
+      console.log("RELOAD");
+      location.reload();
+    });
   },
 
   computed: {
