@@ -49,13 +49,13 @@
         <div class="column is-three-quarters">
           <div class="container" v-if="widgetsData[0]">
             <h1 class="title is-4">Serge</h1>
-            <a target="_blank" href="/overlay/camillelv/serge-bar">
+            <a target="_blank" :href="`/overlay/camillelv/serge-bar?secret=${secret}`">
               <span class="icon has-text-info">
                 <i class="fas fa-link"></i>
               </span>
               Overlay Barre de progression</a>
             <br>
-            <a target="_blank" href="/overlay/camillelv/serge-alert">
+            <a target="_blank" :href="`/overlay/camillelv/serge-alert?secret=${secret}`">
               <span class="icon has-text-info">
                 <i class="fas fa-link"></i>
               </span>
@@ -96,13 +96,13 @@
 
           <div class="container" v-if="widgetsData[1]">
             <h1 class="title is-4">Machine à {{widgetsData[1].name}}</h1>
-            <a target="_blank" href="/overlay/camillelv/dossier-bar">
+            <a target="_blank" :href="`/overlay/camillelv/dossier-bar?secret=${secret}`">
               <span class="icon has-text-info">
                 <i class="fas fa-link"></i>
               </span>
               Overlay Barre de progression</a>
             <br>
-            <a target="_blank" href="/overlay/camillelv/dossier-alert">
+            <a target="_blank" :href="`/overlay/camillelv/dossier-alert?secret=${secret}`">
               <span class="icon has-text-info">
                 <i class="fas fa-link"></i>
               </span>
@@ -200,6 +200,7 @@
   var app = new Vue({
     el: '#app',
     data: {
+      secret: null,
       message: 'Hello Vue!',
       widgetsData: [],
       myWidget: null,
@@ -246,7 +247,9 @@
 
     },
     mounted () {
-
+      const urlParams = new URLSearchParams(window.location.search);
+      const myParam = urlParams.get('secret');
+      this.secret = myParam || null;
     },
 
     methods: {

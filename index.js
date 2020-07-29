@@ -28,18 +28,18 @@ app.get('/', (req, res) => {
   // dbManager.test();
 })
 
-app.get('/camillelv', (req, res) => {
+app.get('/camillelv', checkToken, (req, res) => {
   res.sendFile(__dirname + '/pages/admin.html');
   // dbManager.test();
 })
 
-app.get('/admin', (req, res) => {
+app.get('/admin', checkToken, (req, res) => {
   res.sendFile(__dirname + '/pages/admin.html');
 })
 
-app.get('/overlay/:token/:id', (req, res) => {
-  console.log('token:', req.params.token);
-  if (!req.params.token || !req.params.id) {
+app.get('/overlay/camillelv/:id', checkToken, (req, res) => {
+  //console.log('token:', req.params.token);
+  if (!req.params.id) {
     return res.status(400).send({ message: "token or id missing" });
   }
 
@@ -51,11 +51,19 @@ app.get('/overlay/:token/:id', (req, res) => {
   });
 })
 
-app.use(express.static('./overlays'));
+app.use('/assets', express.static('./overlays/assets'));
+
+function checkToken(req, res, next) {
+  if (req.query.secret == process.env.APP_SECRET_TOKEN) {
+    return next();
+  }
+  res.status(401);
+  res.send({ message: 'Invalid request!'});
+}
+
 
 var admin = io.of('/admin'),
     client = io.of('');
-
 
 admin.on('connection', function (socket) {
   socket.on('message', function(m) {
