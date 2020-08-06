@@ -122,7 +122,7 @@ class StreamlabsHandler extends Handler {
       message.message.forEach(alertMessage => {
         if (this.alertIdsNoSync.indexOf(alertMessage['_id']) === -1) {
           this.alertIdsNoSync.push(alertMessage['_id']);
-          var type = alertMessage.type;
+          var type = message.type;
           if (type === 'subscription' && alertMessage.gifter_display_name) {
             type = 'gift_sub';
           } else if (type === 'subMysteryGift') {
@@ -157,8 +157,8 @@ class StreamlabsHandler extends Handler {
   getDonationParameters(message) {
     return {
       'data': message,
-      'amount': message.rawAmount,
-      'formatted': message.payload.formatted_amount,
+      'amount': message.payload ? message.payload.amount : message.amount,
+      'formatted': message.payload ? message.payload.formatted_amount : message.formatted_amount,
       'message': message.message,
       'user': message.name
     }
