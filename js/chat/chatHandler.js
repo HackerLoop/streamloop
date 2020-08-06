@@ -109,6 +109,7 @@ class ChatHandler extends Handler {
           cooldown = triggerLine[2];
           keyword = triggerLine.slice(3).join(' ');
         }
+        keyword = keyword.toLowerCase();
         cooldown = parseInt(cooldown);
         if (isNaN(cooldown)) {
           cooldown = 0;
@@ -209,22 +210,20 @@ class ChatHandler extends Handler {
     ComfyJS.onCommand = ( user, command, message, flags, extra ) => {
       var combined = '!' + command + ' ' + message;
 
-      if (user.toLowerCase() != this.channel) {
-        this.chatTriggers.forEach(triggerId => {
-          controller.handleData(triggerId, {
+      this.chatTriggers.forEach(triggerId => {
+        controller.handleData(triggerId, {
+          user: user,
+          message: combined,
+          data: {
             user: user,
+            command: command,
             message: combined,
-            data: {
-              user: user,
-              command: command,
-              message: combined,
-              after: message,
-              flags: flags,
-              extra: extra
-            }
-          });
+            after: message,
+            flags: flags,
+            extra: extra
+          }
         });
-      }
+      });
       // Check for matching command and user permission
       if (this.commands.indexOf(command) !== -1) {
         this.commandsInfo[command].forEach(info => {
@@ -249,7 +248,7 @@ class ChatHandler extends Handler {
       else {
         var result = message.match(this.keywordsRegex);
         if (result) {
-          var match = result[0].toLowerCase().trim();
+          var match = result[0].trim().toLowerCase();
           this.keywordsInfo[match].forEach(info => {
             // Check if user has permission to trigger keyword
             if (this.checkPermissions(user, flags, info.permission, info.info) && this.updateCooldown(info)) {
@@ -291,20 +290,18 @@ class ChatHandler extends Handler {
         this.speakers[userLower] = true;
       }
 
-      if (user.toLowerCase() != this.channel) {
-        this.chatTriggers.forEach(triggerId => {
-          controller.handleData(triggerId, {
+      this.chatTriggers.forEach(triggerId => {
+        controller.handleData(triggerId, {
+          user: user,
+          message: message,
+          data: {
             user: user,
             message: message,
-            data: {
-              user: user,
-              message: message,
-              flags: flags,
-              extra: extra
-            }
-          });
+            flags: flags,
+            extra: extra
+          }
         });
-      }
+      });
 
       // Check for matching command and user permission
       var command = message.split(' ')[0];
@@ -332,7 +329,7 @@ class ChatHandler extends Handler {
       else {
         var result = message.match(this.keywordsRegex);
         if (result) {
-          var match = result[0].toLowerCase().trim();
+          var match = result[0].trim().toLowerCase();
           this.keywordsInfo[match].forEach(info => {
             // Check if user has permission to trigger keyword
             if (this.checkPermissions(user, flags, info.permission, info.info) && this.updateCooldown(info)) {

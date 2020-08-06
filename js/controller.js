@@ -16,6 +16,7 @@ class Controller {
     this.initTriggers = [];
     this.addParser('controller', this);
     this.addTrigger('OnInit', 'controller');
+    this.addSuccess('controller');
   }
 
   /**
@@ -125,6 +126,7 @@ class Controller {
    */
   async handleData(triggerId, triggerParams) {
     triggerParams = triggerParams || {};
+    console.log(triggerId, triggerParams);
     if (typeof(this.triggerAsyncMap[triggerId]) !== "undefined") {
       var queue = this.triggerAsync[this.triggerAsyncMap[triggerId]];
       queue.push({
@@ -206,6 +208,14 @@ class Controller {
           if (runParams.skip) {
             toSkip = runParams.skip;
             delete runParams.skip;
+          }
+
+          if (runParams.actions) {
+            runParams.actions.forEach((item, i) => {
+              runParams.actions[i] = shlexSplit(item);
+            });
+
+            triggerSequence.splice(i+1, 0, ...runParams.actions);
           }
 
           // Recreate regex with new params

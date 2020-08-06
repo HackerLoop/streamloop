@@ -120,12 +120,54 @@ var server = http.listen(PORT, () => {
 // Do stuff
 require('./js/controller.js');
 require('./js/streamElementsAlert/streamElementsAlertHandler');
+require('./js/streamlabs/streamlabsHandler');
 require('./js/twitch/twitchHandler');
 require('./js/chat/chatHandler');
 
 var parserTwitch = controller.getParser('Twitch');
 var parserSE = controller.getParser('StreamElementsAlert');
+var parserStreamlabs = controller.getParser('Streamlabs');
 
+if (parserStreamlabs) {
+  // OnSLDonationNoSync
+  parserStreamlabs.addTriggerData('OnSLDonationNoSync', [
+    "OnSLDonationNoSync"
+  ], controller.triggerCount);
+  controller.triggerData[controller.triggerCount] = [
+    ["FUNCTION", (msg) => {
+      console.log("OnSLDonationNoSync");
+      console.log(msg);
+
+    }]
+  ];
+  controller.triggerCount = controller.triggerCount + 1;
+
+  // OnSLTwitchBitsNoSync
+  parserStreamlabs.addTriggerData('OnSLTwitchBitsNoSync', [
+    "OnSLTwitchBitsNoSync"
+  ], controller.triggerCount);
+  controller.triggerData[controller.triggerCount] = [
+    ["FUNCTION", (msg) => {
+      console.log("OnSLTwitchBitsNoSync");
+      console.log(msg);
+
+    }]
+  ];
+  controller.triggerCount = controller.triggerCount + 1;
+
+  // OnSLTwitchSubNoSync
+  parserStreamlabs.addTriggerData('OnSLTwitchSubNoSync', [
+    "OnSLTwitchSubNoSync"
+  ], controller.triggerCount);
+  controller.triggerData[controller.triggerCount] = [
+    ["FUNCTION", (msg) => {
+      console.log("OnSLTwitchSubNoSync");
+      console.log(msg);
+
+    }]
+  ];
+  controller.triggerCount = controller.triggerCount + 1;
+}
 
 if (parserTwitch) {
   // OnChannelPoint
@@ -137,13 +179,14 @@ if (parserTwitch) {
   ], controller.triggerCount);
   controller.triggerData[controller.triggerCount] = [
     ["FUNCTION", (msg) => {
+      console.log("OnChannelPoint");
       console.dir(msg.data, { depth: null });
 
-      var newEvent = {
-        listener: 'OnChannelPoint',
-        event: msg.data
-      }
-      dbManager.addEvent(newEvent);
+      // var newEvent = {
+      //   listener: 'OnChannelPoint',
+      //   event: msg.data
+      // }
+      // dbManager.addEvent(newEvent);
 
       // dbManager.getWidgetData("serge")
       //   .then(data => {
@@ -165,88 +208,6 @@ if (parserTwitch) {
   controller.triggerCount = controller.triggerCount + 1;
 }
 
-if (parserSE) {
-  // OnSEDonation
-  parserSE.addTriggerData('OnSEDonation', [
-    "OnSEDonation"
-  ], controller.triggerCount);
-  controller.triggerData[controller.triggerCount] = [
-    ["FUNCTION", (msg) => {
-      console.log(msg);
-      var newEvent = {
-        listener: 'OnSEDonation',
-        event: msg
-      }
-      dbManager.addEvent(newEvent);
-
-      // dbManager.getViewer()
-      //   .then(data => {
-      //     console.log(data);
-      //     console.log(data.count, msg.amount);
-      //     data.count = data.count + msg.amount;
-      //     if (data.count >= data.goal) {
-      //       data.count = data.count - data.goal;
-      //
-      //       console.log("Reveal Image Dossier !");
-      //       revealDossier(data);
-      //     }
-      //     dbManager.updateWidgetData(data);
-      //   });
-
-      // dbManager.getWidgetData("leaderboard")
-      //   .then(data => {
-      //     console.log(data);
-      //     console.log(data.count, msg.amount);
-      //     data.count = data.count + msg.amount;
-      //     if (data.count >= data.goal) {
-      //       data.count = data.count - data.goal;
-      //
-      //       console.log("Reveal Image Dossier !");
-      //       revealDossier(data);
-      //     }
-      //     dbManager.updateWidgetData(data);
-      //   });
-    }]
-  ];
-  controller.triggerCount = controller.triggerCount + 1;
-
-  // Bits
-  parserSE.addTriggerData('OnSETwitchBits', [
-    "OnSETwitchBits"
-  ], controller.triggerCount);
-  controller.triggerData[controller.triggerCount] = [
-    ["FUNCTION", (msg) => {
-      console.log(msg);
-      var newEvent = {
-        listener: 'OnSETwitchBits',
-        event: msg
-      }
-      dbManager.addEvent(newEvent);
-
-      // do something
-    }]
-  ];
-  controller.triggerCount = controller.triggerCount + 1;
-
-  // Sub
-  parserSE.addTriggerData('OnSETwitchSub', [
-    "OnSETwitchSub"
-  ], controller.triggerCount);
-  controller.triggerData[controller.triggerCount] = [
-    ["FUNCTION", (msg) => {
-      console.log(msg);
-      var newEvent = {
-        listener: 'OnSETwitchSub',
-        event: msg
-      }
-      dbManager.addEvent(newEvent);
-
-      // do something
-    }]
-  ];
-  controller.triggerCount = controller.triggerCount + 1;
-}
-
 controller.doneParsing();
 controller.runInit();
 
@@ -257,3 +218,6 @@ function delay(t, val) {
        }, t);
    });
 }
+
+// const Widget = require('./widgets/streamBoss/widget');
+// const testWidget = new Widget();
