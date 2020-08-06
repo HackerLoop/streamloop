@@ -28,7 +28,7 @@ app.get('/', (req, res) => {
   // dbManager.test();
 })
 
-app.get('/camillelv', checkToken, (req, res) => {
+app.get(`/${process.env.TWITCH_USER}`, checkToken, (req, res) => {
   res.sendFile(__dirname + '/pages/admin.html');
   // dbManager.test();
 })
@@ -37,7 +37,7 @@ app.get('/admin', checkToken, (req, res) => {
   res.sendFile(__dirname + '/pages/admin.html');
 })
 
-app.get('/overlay/camillelv/:id', checkToken, (req, res) => {
+app.get(`/overlay/${process.env.TWITCH_USER}/:id`, checkToken, (req, res) => {
   //console.log('token:', req.params.token);
   if (!req.params.id) {
     return res.status(400).send({ message: "token or id missing" });
@@ -70,9 +70,6 @@ admin.on('connection', function (socket) {
     console.log(m);
   });
 
-  getResources().then((data) => {
-    admin.emit('DOSSIER_LIST', data);
-  })
 
   socket.on('TEST_DOSSIER', function(type) {
     testDossier(type);
@@ -126,12 +123,15 @@ require('./js/streamElementsAlert/streamElementsAlertHandler');
 require('./js/twitch/twitchHandler');
 require('./js/chat/chatHandler');
 
-// OnChannelPoint "Recompense 2"
-var parser = controller.getParser('Twitch');
-if (parser) {
-  var channelPointName = process.env.NODE_ENV !== 'production' ? 'Recompense 1': "Du bouche-à-bouche pour Serge !";
+var parserTwitch = controller.getParser('Twitch');
+var parserSE = controller.getParser('StreamElementsAlert');
 
-  parser.addTriggerData('OnChannelPoint', [
+
+if (parserTwitch) {
+  // OnChannelPoint
+  var channelPointName = process.env.NODE_ENV !== 'production' ? 'Recompense 1': "streamBoss";
+
+  parserTwitch.addTriggerData('OnChannelPoint', [
     "OnChannelPoint",
     channelPointName
   ], controller.triggerCount);
@@ -145,29 +145,28 @@ if (parser) {
       }
       dbManager.addEvent(newEvent);
 
-      dbManager.getWidgetData("serge")
-        .then(data => {
-          data.count++;
-          if (data.count > data.max) { return false; };
-          var remainder = data.count % data.goal;
-          if (data.count > 0 && remainder == 0 && data.count <= data.max) {
-            // do something
-            // trigger pump
-            console.log("trigger Air Pump !", data.duration+"s");
-            io.sockets.emit("EVENT_ALERT_SERGE");
-            triggerSerge(data.duration);
-          }
-          dbManager.updateWidgetData(data);
-        });
+      // dbManager.getWidgetData("serge")
+      //   .then(data => {
+      //     data.count++;
+      //     if (data.count > data.max) { return false; };
+      //     var remainder = data.count % data.goal;
+      //     if (data.count > 0 && remainder == 0 && data.count <= data.max) {
+      //       // do something
+      //       // trigger pump
+      //       console.log("trigger Air Pump !", data.duration+"s");
+      //       io.sockets.emit("EVENT_ALERT_SERGE");
+      //       triggerSerge(data.duration);
+      //     }
+      //     dbManager.updateWidgetData(data);
+      //   });
     }]
   ];
 
   controller.triggerCount = controller.triggerCount + 1;
 }
 
-// OnSEDonation
-var parserSE = controller.getParser('StreamElementsAlert');
 if (parserSE) {
+  // OnSEDonation
   parserSE.addTriggerData('OnSEDonation', [
     "OnSEDonation"
   ], controller.triggerCount);
@@ -180,201 +179,76 @@ if (parserSE) {
       }
       dbManager.addEvent(newEvent);
 
-      dbManager.getWidgetData("dossier")
-        .then(data => {
-          console.log(data);
-          console.log(data.count, msg.amount);
-          data.count = data.count + msg.amount;
-          if (data.count >= data.goal) {
-            data.count = data.count - data.goal;
+      // dbManager.getViewer()
+      //   .then(data => {
+      //     console.log(data);
+      //     console.log(data.count, msg.amount);
+      //     data.count = data.count + msg.amount;
+      //     if (data.count >= data.goal) {
+      //       data.count = data.count - data.goal;
+      //
+      //       console.log("Reveal Image Dossier !");
+      //       revealDossier(data);
+      //     }
+      //     dbManager.updateWidgetData(data);
+      //   });
 
-            console.log("Reveal Image Dossier !");
-            revealDossier(data);
-          }
-          dbManager.updateWidgetData(data);
-        });
+      // dbManager.getWidgetData("leaderboard")
+      //   .then(data => {
+      //     console.log(data);
+      //     console.log(data.count, msg.amount);
+      //     data.count = data.count + msg.amount;
+      //     if (data.count >= data.goal) {
+      //       data.count = data.count - data.goal;
+      //
+      //       console.log("Reveal Image Dossier !");
+      //       revealDossier(data);
+      //     }
+      //     dbManager.updateWidgetData(data);
+      //   });
     }]
   ];
+  controller.triggerCount = controller.triggerCount + 1;
 
+  // Bits
+  parserSE.addTriggerData('OnSETwitchBits', [
+    "OnSETwitchBits"
+  ], controller.triggerCount);
+  controller.triggerData[controller.triggerCount] = [
+    ["FUNCTION", (msg) => {
+      console.log(msg);
+      var newEvent = {
+        listener: 'OnSETwitchBits',
+        event: msg
+      }
+      dbManager.addEvent(newEvent);
+
+      // do something
+    }]
+  ];
+  controller.triggerCount = controller.triggerCount + 1;
+
+  // Sub
+  parserSE.addTriggerData('OnSETwitchSub', [
+    "OnSETwitchSub"
+  ], controller.triggerCount);
+  controller.triggerData[controller.triggerCount] = [
+    ["FUNCTION", (msg) => {
+      console.log(msg);
+      var newEvent = {
+        listener: 'OnSETwitchSub',
+        event: msg
+      }
+      dbManager.addEvent(newEvent);
+
+      // do something
+    }]
+  ];
   controller.triggerCount = controller.triggerCount + 1;
 }
 
 controller.doneParsing();
 controller.runInit();
-
-const cloudinary = require('cloudinary').v2;
-
-const clientAllowedFormats = [
-  "png",
-  "gif",
-  "jpeg",
-  "jpg",
-  "mp4",
-  "m4v",
-  "webm"
-];
-
-async function getResources() {
-  var images = videos = {
-    resources: []
-  };
-  images = await cloudinary.api.resources({
-    resource_type: 'image',
-    type: "upload",
-    image_metadata: true,
-    prefix: "TwitchPhotosDossier/",
-    max_results: 500
-  }).catch(e => {
-    console.log(`Error: ${e.error}`);
-    images.resources = [];
-  });
-
-  videos = await cloudinary.api.resources({
-    resource_type: 'video',
-    type: "upload",
-    image_metadata: true,
-    prefix: "TwitchPhotosDossier/",
-    max_results: 500
-  })
-  .then(res => {
-    let ids = res.resources.map(asset => asset.public_id);
-    return Promise.all(
-      ids.map(id => {
-        return cloudinary.api.resource(id, {
-          image_metadata: true,
-          resource_type: "video"
-        }).then(values => {
-          //console.log(values);
-          //delete values.derived;
-          return values;
-        });
-      }))
-      .then(values => {
-        return values;
-      });
-  })
-  .catch(e => {
-    console.log(`Error: ${e.error.message}`);
-    videos = [];
-  });
-
-  // console.log(videos);
-
-  // Get only video with supported Formats
-  var safeVideos = videos.filter(elem => {
-    return clientAllowedFormats.includes(elem.format);
-  });
-
-  var result = [...images.resources, ...safeVideos].sort((a, b) => (a.created_at > b.created_at) ? -1 : 1);
-
-  return result;
-}
-
-function testDossier(type) {
-  console.log("testDossier");
-  getResources()
-    .then((result) => {
-      if (result) {
-        var remaining = result.filter(elem => {
-          return elem.resource_type == type;
-        });
-
-        var item = remaining[Math.floor(Math.random() * remaining.length)];
-
-        if (item) {
-          io.sockets.emit("EVENT_DOSSIER", item);
-        }
-      }
-    })
-    .catch(e => {
-      console.log(e);
-    });
-}
-
-function revealDossier(data) {
-  getResources()
-    .then((result) => {
-      if (result) {
-        // console.log(result);
-
-        var remaining = result.filter(elem => {
-          return !data.revealed.includes(elem.asset_id);
-        });
-        if (remaining.length <= 0) {
-          // remaining = result.resources;
-          // data.revealed = [];
-          console.log("no more 'dossier'!");
-        }
-
-        var item = remaining[Math.floor(Math.random() * remaining.length)];
-
-        if (item) {
-          console.log("item", item);
-
-          io.sockets.emit("EVENT_DOSSIER", item);
-
-          data.revealed.push(item.asset_id);
-          dbManager.updateWidgetData(data);
-        }
-        else {
-          console.log("no random item found in remaining dossier !");
-        }
-
-
-      }
-    })
-    .catch(e => {
-      console.log(e);
-    });
-}
-
-const { login } = require("tplink-cloud-api");
-const { v4: uuidV4 } = require('uuid');
-
-var tplink;
-
-async function triggerSerge(timer) {
-  if (!tplink) {
-    console.log("ERROR: tplink is null");
-    return false;
-  }
-  await tplink.getHS100("serge").powerOn();
-  await delay(timer*1000);
-  await tplink.getHS100("serge").powerOff();
-}
-
-async function tpLinkConnect() {
-  // log in to cloud, return a connected tplink object
-  tplink = await login(
-    process.env.TPLINK_USER,
-    process.env.TPLINK_PASS,
-    process.env.TPLINK_TERM || uuidV4()
-  );
-  console.log("tpLink "+process.env.TPLINK_USER+" Connected, current auth token is", tplink.getToken());
-
-  // get a list of raw json objects (must be invoked before .get* works)
-  const dl = await tplink.getDeviceList();
-  console.log("TP Link device list", dl);
-
-  // find a device by alias:
-  //myPlug = tplink.getHS100("Serge");
-  // or find by deviceId:
-  // let myPlug = tplink.getHS100("558185B7EC793602FB8802A0F002BA80CB96F401");
-  //console.log("myPlug:", myPlug);
-
-  //let response = await myPlug.powerOn();
-  //console.log("response=" + response );
-
-  // let response = await myPlug.toggle();
-  // console.log("response=" + response);
-  //
-  // response = await myPlug.getSysInfo();
-  // console.log("relay_state=" + response.relay_state);
-  //
-  // console.log(await myPlug.getRelayState());
-}
-
-tpLinkConnect();
 
 function delay(t, val) {
    return new Promise(function(resolve) {
