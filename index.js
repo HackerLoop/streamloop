@@ -75,6 +75,10 @@ admin.on('connection', function (socket) {
     testDossier(type);
   });
 
+  socket.on('RESET_STREAMBOSS', function(obj) {
+    dbManager.resetSessionLeaderboard(obj);
+  });
+
   //admin.emit('message1', 'Message1: admin to admin');
   //client.emit('message1', 'Message1: admin to client');
 });
@@ -138,6 +142,17 @@ if (parserStreamlabs) {
       console.log("OnSLDonationNoSync");
       console.log(msg);
 
+      var newEvent = {
+        listener: 'OnSLDonationNoSync',
+        event: msg
+      }
+      dbManager.addEvent(newEvent);
+
+      dbManager.getWidgetData("streamboss")
+        .then(data => {
+          var points = msg.amount * data.donationPoint;
+          addViewerPoints(points, msg, data);
+        });
     }]
   ];
   controller.triggerCount = controller.triggerCount + 1;
@@ -150,7 +165,17 @@ if (parserStreamlabs) {
     ["FUNCTION", (msg) => {
       console.log("OnSLTwitchBitsNoSync");
       console.log(msg);
+      var newEvent = {
+        listener: 'OnSLTwitchBitsNoSync',
+        event: msg
+      }
+      dbManager.addEvent(newEvent);
 
+      dbManager.getWidgetData("streamboss")
+        .then(data => {
+          var points = msg.amount * data.bitsPoint;
+          addViewerPoints(points, msg, data);
+        });
     }]
   ];
   controller.triggerCount = controller.triggerCount + 1;
@@ -163,7 +188,17 @@ if (parserStreamlabs) {
     ["FUNCTION", (msg) => {
       console.log("OnSLTwitchSubNoSync");
       console.log(msg);
+      var newEvent = {
+        listener: 'OnSLTwitchSubNoSync',
+        event: msg
+      }
+      dbManager.addEvent(newEvent);
 
+      dbManager.getWidgetData("streamboss")
+        .then(data => {
+          var points = data.subscriptionPoint;
+          addViewerPoints(points, msg, data);
+        });
     }]
   ];
   controller.triggerCount = controller.triggerCount + 1;
@@ -180,28 +215,19 @@ if (parserTwitch) {
   controller.triggerData[controller.triggerCount] = [
     ["FUNCTION", (msg) => {
       console.log("OnChannelPoint");
-      console.dir(msg.data, { depth: null });
+      console.dir(msg, { depth: null });
 
-      // var newEvent = {
-      //   listener: 'OnChannelPoint',
-      //   event: msg.data
-      // }
-      // dbManager.addEvent(newEvent);
+      var newEvent = {
+        listener: 'OnChannelPoint',
+        event: msg.data
+      }
+      dbManager.addEvent(newEvent);
 
-      // dbManager.getWidgetData("serge")
-      //   .then(data => {
-      //     data.count++;
-      //     if (data.count > data.max) { return false; };
-      //     var remainder = data.count % data.goal;
-      //     if (data.count > 0 && remainder == 0 && data.count <= data.max) {
-      //       // do something
-      //       // trigger pump
-      //       console.log("trigger Air Pump !", data.duration+"s");
-      //       io.sockets.emit("EVENT_ALERT_SERGE");
-      //       triggerSerge(data.duration);
-      //     }
-      //     dbManager.updateWidgetData(data);
-      //   });
+      dbManager.getWidgetData("streamboss")
+        .then(data => {
+          var points = data.rewardPoint;
+          addViewerPoints(points, msg, data);
+        });
     }]
   ];
 
@@ -217,6 +243,32 @@ function delay(t, val) {
            resolve(val);
        }, t);
    });
+}
+
+function addViewerPoints(points, userData, widgetData) {
+  dbManager.getViewer(userData.user)
+    .then(viewer => {
+      if (viewer) {
+        viewer.sessionPoints += points;
+        viewer.points += points;
+      }
+      else {
+        viewer = userData;
+        viewer.sessionPoints = points;
+        viewer.points = points;
+      }
+
+      widgetData.current += points;
+      if (widgetData.current >= widgetData.goal) {
+        console.log("new streamBoss:", viewer.user);
+        widgetData.boss = viewer;
+        widgetData.current = widgetData.current - widgetData.goal;
+        viewer.sessionPoints = widgetData.current;
+      }
+
+      dbManager.updateViewer(viewer);
+      dbManager.updateWidgetData(widgetData);
+    });
 }
 
 // const Widget = require('./widgets/streamBoss/widget');

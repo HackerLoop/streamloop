@@ -126,7 +126,6 @@ class Controller {
    */
   async handleData(triggerId, triggerParams) {
     triggerParams = triggerParams || {};
-    console.log(triggerId, triggerParams);
     if (typeof(this.triggerAsyncMap[triggerId]) !== "undefined") {
       var queue = this.triggerAsync[this.triggerAsyncMap[triggerId]];
       queue.push({
