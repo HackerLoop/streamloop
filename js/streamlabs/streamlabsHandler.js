@@ -244,7 +244,7 @@ class StreamlabsHandler extends Handler {
       'user': message.name,
       'months': message.months,
       'message': message.message,
-      'tier': message.subPlan === 'Prime' ? 'Prime' : 'Tier ' + (parseInt(message.subPlan) / 1000)
+      'tier': message.sub_plan === 'Prime' ? 'Prime' : 'Tier ' + (parseInt(message.sub_plan) / 1000)
     }
   }
 }
