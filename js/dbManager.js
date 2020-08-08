@@ -92,11 +92,13 @@ const updateViewer = async (data) => {
   }
   try {
     await Viewers.updateOne({user: data.user}, {$set: data}, {upsert: true});
+    let Viewer = await Viewers.findOne({user: data.user});
     let ViewersData = await Viewers.find({}, {
       sort: {sessionPoints: -1}
     }).toArray();
     if (socketio) {
       socketio.emit("VIEWERS_LIST", ViewersData);
+      socketio.emit("VIEWER_EVENT", Viewer);
     }
   } catch(err) {
     console.log(err);

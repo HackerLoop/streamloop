@@ -119,6 +119,7 @@ class StreamlabsHandler extends Handler {
         }
       }
     } else if (this.alertsNoSync.indexOf(message.type) !== -1) {
+      console.log("alertsNoSync", message);
       message.message.forEach(alertMessage => {
         if (this.alertIdsNoSync.indexOf(alertMessage['_id']) === -1) {
           this.alertIdsNoSync.push(alertMessage['_id']);
@@ -189,7 +190,7 @@ class StreamlabsHandler extends Handler {
       'user': message.name,
       'gifter': gifter,
       'months': message.months,
-      'tier': message.subPlan === 'Prime' ? 'Prime' : 'Tier ' + (parseInt(message.subPlan) / 1000)
+      'tier': message.sub_plan === 'Prime' ? 'Prime' : 'Tier ' + (parseInt(message.sub_plan) / 1000)
     }
   }
 
@@ -206,7 +207,7 @@ class StreamlabsHandler extends Handler {
       'data': message,
       'amount': message.amount,
       'gifter': gifter,
-      'tier': message.subPlan === 'Prime' ? 'Prime' : 'Tier ' + (parseInt(message.subPlan) / 1000)
+      'tier': message.sub_plan === 'Prime' ? 'Prime' : 'Tier ' + (parseInt(message.sub_plan) / 1000)
     }
   }
 

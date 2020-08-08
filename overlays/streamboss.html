@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>streamboss</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<body>
+  <div id="app">
+    <div class="content">
+      <h3 class="">Current streamboss: 👑 {{streamboss.user}}</h3>
+      <p>{{current}} / {{goal}}</p>
+      <h3 class="">Top 3</h3>
+      <ol type="1">
+        <li v-for="viewer in viewers.slice(0, 3)" v-if="viewer.sessionPoints > 0">
+          {{ viewer.user }} - {{ viewer.sessionPoints }}pts
+        </li>
+      </ol>
+      <img v-bind:src="userImg" width="300" height="300" alt="">
+    </div>
+  </div>
+</body>
+
+<script>
+let queue = [];
+var timer;
+var audio = new Audio('/assets/sfx/master-sword.mp3');
+audio.volume = 1;
+
+var socket = io('', {query: "user=hackerloop"});
+var app = new Vue({
+  el: '#app',
+  data: {
+    streamboss: {},
+    viewers: [],
+    isPlaying: false,
+    goal: 0,
+    current: 0,
+    userImg: ''
+  },
+  created () {
+
+    socket.on('WIDGETS_DATA', (obj) => {
+      var data = obj.find(elem => {
+        return elem.name == "streamboss"
+      })
+      console.log(data);
+      this.streamboss = data.boss;
+      this.goal = data.goal;
+      this.current = data.current;
+    });
+
+    socket.on('VIEWERS_LIST', (obj) => {
+      console.log('VIEWERS_LIST', obj);
+      this.viewers = obj;
+    });
+
+    socket.on('VIEWER_EVENT', (obj) => {
+      console.log(obj);
+      queue.push(obj);
+      this.playEvent();
+    });
+
+    socket.on('RELOAD_OVERLAY', () => {
+      console.log("RELOAD");
+      location.reload();
+    });
+  },
+
+  computed: {
+    lastEvent() {
+      return this.events.slice(-1)[0]
+    }
+  },
+
+  methods: {
+    playEvent() {
+      if (this.isPlaying) {
+        console.log('Alert is still playing');
+        return;
+      }
+      if (!queue.length) {
+        console.log('queue is empty');
+        return;
+      }
+      const event = queue.shift();
+
+      axios.get('https://decapi.me/twitch/avatar/'+event.user)
+      .then((response) => {
+        console.log(response.data);
+        this.userImg = response.data;
+        this.playAlert();
+      })
+    },
+
+    playAlert(event) {
+
+      audio.play();
+      this.isPlaying = true;
+
+      setTimeout(() => {
+        console.log('Alert is done playing');
+        this.isPlaying = false;
+        this.userImg = "";
+        setTimeout(() => {
+          this.playEvent();
+        }, 1000);
+      }, 4000);
+    }
+  }
+})
+</script>
+
+<style lang="scss" scoped>
+  @import url('https://fonts.googleapis.com/css2?family=Anton&family=Montserrat&display=swap');
+
+  html, body {
+    font-family: 'Montserrat', sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+
+  *, *:before, *:after {
+    box-sizing: border-box;
+  }
+
+  /* CUSTOM CSS */
+
+</style>
+
+</html>

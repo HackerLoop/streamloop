@@ -196,9 +196,37 @@ if (parserStreamlabs) {
 
       dbManager.getWidgetData("streamboss")
         .then(data => {
-          var points = data.subscriptionPoint;
+          var tier = msg.data.sub_plan === 'Prime' ? 1 : (parseInt(msg.data.sub_plan) / 1000);
+          var multiplicator = tier < 3 ? tier : tier+2;
+          var points = data.subscriptionPoint * multiplicator;
           addViewerPoints(points, msg, data);
         });
+    }]
+  ];
+  controller.triggerCount = controller.triggerCount + 1;
+
+  // OnSLTwitchCommunityGiftSubNoSync
+  parserStreamlabs.addTriggerData('OnSLTwitchCommunityGiftSubNoSync', [
+    "OnSLTwitchCommunityGiftSubNoSync"
+  ], controller.triggerCount);
+  controller.triggerData[controller.triggerCount] = [
+    ["FUNCTION", (msg) => {
+      console.log("OnSLTwitchCommunityGiftSubNoSync");
+      console.log(msg);
+
+    }]
+  ];
+  controller.triggerCount = controller.triggerCount + 1;
+
+  // OnSLTwitchGiftSubNoSync
+  parserStreamlabs.addTriggerData('OnSLTwitchGiftSubNoSync', [
+    "OnSLTwitchGiftSubNoSync"
+  ], controller.triggerCount);
+  controller.triggerData[controller.triggerCount] = [
+    ["FUNCTION", (msg) => {
+      console.log("OnSLTwitchGiftSubNoSync");
+      console.log(msg);
+
     }]
   ];
   controller.triggerCount = controller.triggerCount + 1;
@@ -248,6 +276,7 @@ function delay(t, val) {
 function addViewerPoints(points, userData, widgetData) {
   dbManager.getViewer(userData.user)
     .then(viewer => {
+      points = Math.round(points);
       if (viewer) {
         viewer.sessionPoints += points;
         viewer.points += points;
