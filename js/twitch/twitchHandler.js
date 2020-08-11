@@ -109,6 +109,7 @@ class TwitchHandler extends Handler {
   onMessage(message) {
     if (message.data) {
       var data = JSON.parse(message.data);
+      console.log(data);
       if (data.type === 'RESPONSE' && data.error === '') {
         this.success();
       } else if (data.type == 'MESSAGE' && data.data.topic.startsWith('community-points-channel-v1.')) {
