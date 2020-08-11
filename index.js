@@ -285,18 +285,32 @@ function addViewerPoints(points, userData, widgetData) {
         viewer = userData;
         viewer.sessionPoints = points;
         viewer.points = points;
+        viewer.bossCount = 0;
       }
 
       widgetData.current += points;
       if (widgetData.current >= widgetData.goal) {
         console.log("new streamBoss:", viewer.user);
         widgetData.boss = viewer;
-        widgetData.current = widgetData.current - widgetData.goal;
-        viewer.sessionPoints = widgetData.current;
+        widgetData.bossHistory.push({
+          user: viewer.user,
+          sessionPoints: viewer.sessionPoints,
+          points: viewer.points,
+          time: new Date()
+        });
+        // widgetData.current = widgetData.current - widgetData.goal;
+        // viewer.sessionPoints = widgetData.current;
+        if (!viewer.bossCount) {
+          viewer.bossCount = 0;
+        }
+        viewer.bossCount++;
+        dbManager.updateViewer(viewer);
+        dbManager.resetSessionLeaderboard(widgetData);
       }
-
-      dbManager.updateViewer(viewer);
-      dbManager.updateWidgetData(widgetData);
+      else {
+        dbManager.updateViewer(viewer);
+        dbManager.updateWidgetData(widgetData);
+      }
     });
 }
 

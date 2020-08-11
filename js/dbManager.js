@@ -61,7 +61,7 @@ const init = async (io) => {
 
 const addEvent = async (eventData) => {
   // do stuff for progress bar and goal here
-
+  eventData.createdAt = new Date();
   try {
     var dbEvent = await Events.insertOne(eventData);
     let newEvent = await Events.findOne({_id: dbEvent.insertedId});

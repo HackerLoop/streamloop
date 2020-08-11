@@ -122,7 +122,23 @@
           </div>
           <br>
           <br>
-
+          <div class="content">
+            <h1 class="title is-5">👑 Top StreamBoss</h1>
+            <ol type="1">
+              <li v-for="viewer in sortedBoss.slice(0, 10)" v-if="viewer.bossCount > 0">
+                👑x{{ viewer.bossCount }} {{ viewer.user }} - {{ viewer.points }}pts
+              </li>
+            </ol>
+          </div>
+          <br>
+          <div class="content">
+            <h1 class="title is-5">StreamBoss History</h1>
+            <ul>
+              <li v-for="viewer in bossHistory.slice(0, 10)">
+                👑{{ viewer.user }}
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
@@ -131,7 +147,9 @@
   </div>
 </body>
 
+<script src="https://momentjs.com/downloads/moment.min.js"></script>
 <script>
+  moment.locale('fr');
 
   var socket = io();
   const adminSocket = io('/admin');
@@ -145,7 +163,8 @@
       myWidget: null,
       resourcesGallery: [],
       events: [],
-      viewers: []
+      viewers: [],
+      bossHistory: []
     },
     created () {
       window.onbeforeunload = () => {
@@ -155,6 +174,7 @@
       socket.on('WIDGETS_DATA', (obj) => {
         this.widgetsData = obj;
         console.log('WIDGETS_DATA', obj);
+        this.bossHistory = obj[2].bossHistory;
       });
 
       socket.on('EVENT_LIST', (obj) => {
@@ -184,11 +204,28 @@
 
     },
 
-    methods: {
-      send() {
-        socket.emit('message', {
-          message: "coucou"
+    computed: {
+      sortedBoss: function () {
+        return this.viewers.sort((a, b) => {
+          if (a.bossCount == b.bossCount) {
+            return b.points - a.points;
+          }
+          else {
+            return b.bossCount - a.bossCount;
+          }
         });
+      }
+    },
+
+    filters: {
+      moment: function (date) {
+        return moment(date).format('Do MMM YYYY');
+      }
+    },
+
+    methods: {
+      moment: function () {
+        return moment();
       },
 
       updateWidget(index) {
