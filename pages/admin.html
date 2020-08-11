@@ -13,9 +13,6 @@
 </head>
 <body>
   <div id="app">
-    <!-- <div class="navbar">
-      <div class="container"></div>
-    </div> -->
     <div class="main">
       <div class="container is-fluid columns">
         <div class="column activity">
@@ -72,7 +69,7 @@
         </div>
 
         <div class="column is-three-quarters widget">
-          <div class="container" v-if="widgetsData[2]">
+          <div class="container" v-if="widgetStreamboss">
             <h1 class="title is-4">StreamBoss</h1>
             <a target="_blank" :href="`/overlay/${user}/streamboss?secret=${secret}`">
               <span class="icon has-text-info">
@@ -85,7 +82,7 @@
             <br>
             <br>
             <div class="content">
-              <h1 class="title is-5">👑 StreamBoss: {{widgetsData[2].boss.user}}</h1>
+              <h1 class="title is-5">👑 StreamBoss: {{widgetStreamboss.boss.user}}</h1>
               <h1 class="title is-5">Leaderboard</h1>
               <ol type="1">
                 <li v-for="viewer in viewers.slice(0, 5)" v-if="viewer.sessionPoints > 0">
@@ -94,9 +91,9 @@
               </ol>
             </div>
             <br>
-            <button class="button is-warning" type="button" @click="resetBossCounter(2)">Réinitialiser progression</button>
+            <button class="button is-warning" type="button" @click="resetBossCounter()">Réinitialiser progression</button>
             <br><br>
-            <form v-on:submit.prevent="updateWidget(2)">
+            <form v-on:submit.prevent="updateWidget('streamboss')">
               <table class="table is-bordered is-striped is-fullwidth">
                 <tr>
                   <th>Objectif</th>
@@ -107,12 +104,12 @@
                   <th>Points par Récompense de chaine</th>
                 </tr>
                 <tr>
-                  <td><input type="number" step="any" v-model.number="widgetsData[2].goal"></td>
-                  <td><input type="number" step="any" v-model.number="widgetsData[2].current"></td>
-                  <td><input type="number" step="any" v-model.number="widgetsData[2].subscriptionPoint"></td>
-                  <td><input type="number" step="any" v-model.number="widgetsData[2].donationPoint"></td>
-                  <td><input type="number" step="any" v-model.number="widgetsData[2].bitsPoint"></td>
-                  <td><input type="number" step="any" v-model.number="widgetsData[2].rewardPoint"></td>
+                  <td><input type="number" step="any" v-model.number="widgetStreamboss.goal"></td>
+                  <td><input type="number" step="any" v-model.number="widgetStreamboss.current"></td>
+                  <td><input type="number" step="any" v-model.number="widgetStreamboss.subscriptionPoint"></td>
+                  <td><input type="number" step="any" v-model.number="widgetStreamboss.donationPoint"></td>
+                  <td><input type="number" step="any" v-model.number="widgetStreamboss.bitsPoint"></td>
+                  <td><input type="number" step="any" v-model.number="widgetStreamboss.rewardPoint"></td>
                 </tr>
               </table>
 
@@ -147,10 +144,7 @@
   </div>
 </body>
 
-<script src="https://momentjs.com/downloads/moment.min.js"></script>
 <script>
-  moment.locale('fr');
-
   var socket = io();
   const adminSocket = io('/admin');
   var app = new Vue({
@@ -158,8 +152,8 @@
     data: {
       user: null,
       secret: null,
-      message: 'Hello Vue!',
       widgetsData: [],
+      widgetStreamboss: null,
       myWidget: null,
       resourcesGallery: [],
       events: [],
@@ -172,9 +166,12 @@
       }
 
       socket.on('WIDGETS_DATA', (obj) => {
-        this.widgetsData = obj;
         console.log('WIDGETS_DATA', obj);
-        this.bossHistory = obj[2].bossHistory;
+        this.widgetsData = obj;
+        var data = this.getWigetData('streamboss');
+        this.widgetStreamboss = data;
+
+        this.bossHistory = data.bossHistory;
       });
 
       socket.on('EVENT_LIST', (obj) => {
@@ -186,12 +183,6 @@
         console.log('VIEWERS_LIST', obj);
         this.viewers = obj;
       });
-
-      // adminSocket.on('DOSSIER_LIST', (obj) => {
-      //   this.resourcesGallery = obj;
-      //   console.log(obj);
-      // });
-
 
     },
     mounted () {
@@ -217,66 +208,23 @@
       }
     },
 
-    filters: {
-      moment: function (date) {
-        return moment(date).format('Do MMM YYYY');
-      }
-    },
-
     methods: {
-      moment: function () {
-        return moment();
+      updateWidget(widgetName) {
+        socket.emit('UPDATE_WIDGET', this.getWigetData(widgetName));
       },
 
-      updateWidget(index) {
-        console.log(this.widgetsData[index]);
-        socket.emit('UPDATE_WIDGET', this.widgetsData[index]);
-      },
-
-      resetMichelCounter(index) {
-        this.widgetsData[index].count = 0;
-        this.widgetsData[index].offset = 0;
-        socket.emit('UPDATE_WIDGET', this.widgetsData[index]);
-      },
-
-      resetBossCounter(index) {
-        adminSocket.emit('RESET_STREAMBOSS', this.widgetsData[index]);
-      },
-
-      resetDossierCounter(index) {
-        this.widgetsData[index].count = 0;
-        socket.emit('UPDATE_WIDGET', this.widgetsData[index]);
-      },
-
-      resetDossierRevealed(index) {
-        this.widgetsData[index].revealed = [];
-        socket.emit('UPDATE_WIDGET', this.widgetsData[index]);
-      },
-
-      cancelDossierRevealed(id) {
-        this.widgetsData[1].revealed.splice(this.widgetsData[1].revealed.indexOf(id), 1);
-        socket.emit('UPDATE_WIDGET', this.widgetsData[1]);
-      },
-
-      addDossierRevealed(id) {
-        this.widgetsData[1].revealed.push(id);
-        socket.emit('UPDATE_WIDGET', this.widgetsData[1]);
-      },
-
-      showWidget(widget) {
-        this.myWidget.open();
-      },
-
-      testSerge(duration) {
-        // socket.emit('TEST_SERGE', duration);
-      },
-
-      testDossier(type) {
-        adminSocket.emit('TEST_DOSSIER', type);
+      resetBossCounter() {
+        adminSocket.emit('RESET_STREAMBOSS', this.getWigetData('streamboss'));
       },
 
       reloadOverlays() {
         socket.emit('RELOAD_OVERLAYS');
+      },
+
+      getWigetData(name) {
+        return this.widgetsData.find(elem => {
+          return elem.name == name
+        })
       }
     }
   })
