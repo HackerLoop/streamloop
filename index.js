@@ -123,13 +123,13 @@ var server = http.listen(PORT, () => {
 
 // Do stuff
 require('./js/controller.js');
-require('./js/streamElementsAlert/streamElementsAlertHandler');
+// require('./js/streamElementsAlert/streamElementsAlertHandler');
 require('./js/streamlabs/streamlabsHandler');
 require('./js/twitch/twitchHandler');
 require('./js/chat/chatHandler');
 
 var parserTwitch = controller.getParser('Twitch');
-var parserSE = controller.getParser('StreamElementsAlert');
+// var parserSE = controller.getParser('StreamElementsAlert');
 var parserStreamlabs = controller.getParser('Streamlabs');
 
 if (parserStreamlabs) {
