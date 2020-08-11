@@ -234,7 +234,7 @@ if (parserStreamlabs) {
 
 if (parserTwitch) {
   // OnChannelPoint
-  var channelPointName = process.env.NODE_ENV !== 'production' ? 'Recompense 1': "streamBoss";
+  var channelPointName = process.env.NODE_ENV !== 'production' ? 'Recompense 1': "Recompense 1";
 
   parserTwitch.addTriggerData('OnChannelPoint', [
     "OnChannelPoint",
