@@ -213,6 +213,11 @@ if (parserStreamlabs) {
     ["FUNCTION", (msg) => {
       console.log("OnSLTwitchCommunityGiftSubNoSync");
       console.log(msg);
+      var newEvent = {
+        listener: 'OnSLTwitchCommunityGiftSubNoSync',
+        event: msg
+      }
+      dbManager.addEvent(newEvent);
 
     }]
   ];
@@ -226,7 +231,11 @@ if (parserStreamlabs) {
     ["FUNCTION", (msg) => {
       console.log("OnSLTwitchGiftSubNoSync");
       console.log(msg);
-
+      var newEvent = {
+        listener: 'OnSLTwitchGiftSubNoSync',
+        event: msg
+      }
+      dbManager.addEvent(newEvent);
     }]
   ];
   controller.triggerCount = controller.triggerCount + 1;
@@ -242,7 +251,7 @@ if (parserTwitch) {
   ], controller.triggerCount);
   controller.triggerData[controller.triggerCount] = [
     ["FUNCTION", (msg) => {
-      console.log("OnChannelPoint");
+      console.log("OnChannelPoint ", channelPointName);
       console.dir(msg, { depth: null });
 
       var newEvent = {
@@ -256,6 +265,19 @@ if (parserTwitch) {
           var points = data.rewardPoint;
           addViewerPoints(points, msg, data);
         });
+    }]
+  ];
+
+  controller.triggerCount = controller.triggerCount + 1;
+
+  parserTwitch.addTriggerData('OnChannelPoint', [
+    "OnChannelPoint",
+    "*"
+  ], controller.triggerCount);
+  controller.triggerData[controller.triggerCount] = [
+    ["FUNCTION", (msg) => {
+      console.log("OnChannelPoint *");
+      console.dir(msg, { depth: null });
     }]
   ];
 
