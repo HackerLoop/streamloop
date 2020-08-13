@@ -336,5 +336,11 @@ function addViewerPoints(points, userData, widgetData) {
     });
 }
 
-// const Widget = require('./widgets/streamBoss/widget');
-// const testWidget = new Widget();
+function newSuccesfulDunk() {
+  dbManager.getWidgetData("crossket")
+    .then(data => {
+      data.currentSuccess += 1;
+      data.allTimeSuccess += 1;
+      dbManager.updateWidgetData(data);
+    });
+}
