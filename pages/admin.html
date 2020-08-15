@@ -53,6 +53,12 @@
                 <p class="content is-small">{{item.event.message}}</p>
 
               </div>
+              <div class="" v-else-if="item.listener == 'OnSLTwitchGiftSubNoSync'">
+                <p>
+                  {{item.event.gifter}}
+                  offre un abonnement {{item.event.tier}} à : {{item.event.user}}
+                </p>
+              </div>
               <div class="" v-else-if="item.listener == 'OnSLTwitchBitsNoSync'">
                 <p>
                   {{item.event.user}}

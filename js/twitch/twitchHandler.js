@@ -120,7 +120,7 @@ class TwitchHandler extends Handler {
           this.onCommunityGoalMessage(dataMessage);
         }
       } else if (data.type == 'MESSAGE' && data.data.topic.startsWith('hype-train-events-v1.')) {
-        this.onHypeTrainMessage(JSON.parse(data.data.message));
+        // this.onHypeTrainMessage(JSON.parse(data.data.message));
       }
     }
   }

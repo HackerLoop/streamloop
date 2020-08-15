@@ -236,6 +236,20 @@ if (parserStreamlabs) {
         event: msg
       }
       dbManager.addEvent(newEvent);
+
+      dbManager.getWidgetData("streamboss")
+        .then(data => {
+          var tier = msg.data.sub_plan === 'Prime' ? 1 : (parseInt(msg.data.sub_plan) / 1000);
+          var multiplicator = tier < 3 ? tier : tier+2;
+          var points = data.subscriptionPoint * multiplicator;
+          addViewerPoints(points, {
+            user: msg.gifter,
+            data: {
+              name: msg.data.gifter,
+              display_name: msg.data.gifter_display_name
+            }
+          }, data);
+        });
     }]
   ];
   controller.triggerCount = controller.triggerCount + 1;
