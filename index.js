@@ -51,6 +51,13 @@ app.get(`/overlay/${process.env.TWITCH_USER}/:id`, checkToken, (req, res) => {
   });
 })
 
+app.get(`/api/score`, (req, res) => {
+  dbManager.getWidgetData("crossket")
+    .then(data => {
+      res.send(''+data.currentSuccess);
+    });
+})
+
 app.post('/dunk', (req, res) => {
   console.log(req.body);
 })
