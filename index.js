@@ -51,6 +51,10 @@ app.get(`/overlay/${process.env.TWITCH_USER}/:id`, checkToken, (req, res) => {
   });
 })
 
+app.post('/dunk', (req, res) => {
+  console.log(req.body);
+})
+
 app.use('/assets', express.static('./overlays/assets'));
 
 function checkToken(req, res, next) {
