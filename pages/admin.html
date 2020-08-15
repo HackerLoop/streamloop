@@ -75,8 +75,31 @@
         </div>
 
         <div class="column is-three-quarters widget">
+          <div class="container" v-if="widgetCrossket">
+            <h1 class="title is-4">🏀 Crossket</h1>
+            <br>
+            <!-- <div class="content">
+              <h6 class="title is-6">Total Paniers réussis: {{widgetCrossket.allTimeSuccess}}</h6>
+            </div> -->
+            <button class="button is-warning" type="button" @click="resetCrossketCurrent()">Réinitialiser compteur</button>
+            <button class="button" type="button" @click="addOneDunk()">+1 panier</button>
+            <br><br>
+            <form v-on:submit.prevent="updateWidget('crossket')">
+              <table class="table is-bordered is-striped">
+                <tr>
+                  <th>Paniers réussis</th>
+                </tr>
+                <tr>
+                  <td><input type="number" v-model.number="widgetCrossket.currentSuccess"></td>
+                </tr>
+              </table>
+              <button class="button is-primary" type="submit">Mettre à jour</button>
+            </form>
+          </div>
+          <br>
+          <hr class="hr">
           <div class="container" v-if="widgetStreamboss">
-            <h1 class="title is-4">StreamBoss</h1>
+            <h1 class="title is-4">👑 StreamBoss</h1>
             <a target="_blank" :href="`/overlay/${user}/streamboss?secret=${secret}`">
               <span class="icon has-text-info">
                 <i class="fas fa-link"></i>
@@ -160,6 +183,7 @@
       secret: null,
       widgetsData: [],
       widgetStreamboss: null,
+      widgetCrossket: null,
       myWidget: null,
       resourcesGallery: [],
       events: [],
@@ -176,6 +200,8 @@
         this.widgetsData = obj;
         var data = this.getWigetData('streamboss');
         this.widgetStreamboss = data;
+
+        this.widgetCrossket = this.getWigetData('crossket');
 
         this.bossHistory = data.bossHistory;
       });
@@ -221,6 +247,17 @@
 
       resetBossCounter() {
         adminSocket.emit('RESET_STREAMBOSS', this.getWigetData('streamboss'));
+      },
+
+      resetCrossketCurrent() {
+        this.widgetCrossket.currentSuccess = 0;
+        socket.emit('UPDATE_WIDGET', this.widgetCrossket);
+      },
+
+      addOneDunk() {
+        this.widgetCrossket.currentSuccess += 1;
+        this.widgetCrossket.allTimeSuccess += 1;
+        socket.emit('UPDATE_WIDGET', this.widgetCrossket);
       },
 
       reloadOverlays() {

@@ -51,6 +51,17 @@ app.get(`/overlay/${process.env.TWITCH_USER}/:id`, checkToken, (req, res) => {
   });
 })
 
+app.get(`/api/score`, (req, res) => {
+  dbManager.getWidgetData("crossket")
+    .then(data => {
+      res.send(''+data.currentSuccess);
+    });
+})
+
+app.post('/dunk', (req, res) => {
+  console.log(req.body);
+})
+
 app.use('/assets', express.static('./overlays/assets'));
 
 function checkToken(req, res, next) {
@@ -350,5 +361,11 @@ function addViewerPoints(points, userData, widgetData) {
     });
 }
 
-// const Widget = require('./widgets/streamBoss/widget');
-// const testWidget = new Widget();
+function newSuccesfulDunk() {
+  dbManager.getWidgetData("crossket")
+    .then(data => {
+      data.currentSuccess += 1;
+      data.allTimeSuccess += 1;
+      dbManager.updateWidgetData(data);
+    });
+}
