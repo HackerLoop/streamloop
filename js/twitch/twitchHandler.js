@@ -151,6 +151,24 @@ class TwitchHandler extends Handler {
         });
       })
     }
+    var rewardID = message.data.redemption.reward.id;
+    if (this.rewards.indexOf(rewardID) !== -1) {
+      // Grab data to return
+      var user = message.data.redemption.user.display_name;
+      var input = '';
+      if ('undefined' !== typeof(message.data.redemption.user_input)) {
+        input = message.data.redemption.user_input;
+      }
+
+      // Handle triggers
+      this.rewardsTrigger[rewardID].forEach(triggerId => {
+        controller.handleData(triggerId, {
+          user: user,
+          message: input,
+          data: message
+        });
+      })
+    }
     if (this.rewards.indexOf('*') !== -1) {
       // Grab data to return
       var user = message.data.redemption.user.display_name;
