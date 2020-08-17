@@ -80,7 +80,7 @@ var app = new Vue({
       this.goal = data.goal;
 
       // Fist load
-      if (!this.streamboss.time) {
+      if (!this.streamboss.time && data.boss) {
         this.streamboss = data.boss;
         axios.get('https://decapi.me/twitch/avatar/'+data.boss.user)
         .then((response) => {
