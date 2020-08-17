@@ -51,15 +51,29 @@ app.get(`/overlay/${process.env.TWITCH_USER}/:id`, checkToken, (req, res) => {
   });
 })
 
-app.get(`/api/score`, (req, res) => {
+/* API */
+app.get(`/api/mrpierrecroce/score`, (req, res) => {
   dbManager.getWidgetData("crossket")
     .then(data => {
       res.send(''+data.currentSuccess);
     });
 })
 
-app.post('/dunk', (req, res) => {
+app.get(`/api/mrpierrecroce/king`, (req, res) => {
+  dbManager.getWidgetData("streamboss")
+    .then(data => {
+      res.send(''+data.boss.user);
+    });
+})
+
+app.post('/api/mrpierrecroce/dunk', checkToken, (req, res) => {
   console.log(req.body);
+  if (req.body.success) {
+    newSuccessfulDunk();
+  }
+  else {
+    newFailDunk();
+  }
 })
 
 app.use('/assets', express.static('./overlays/assets'));
@@ -361,11 +375,20 @@ function addViewerPoints(points, userData, widgetData) {
     });
 }
 
-function newSuccesfulDunk() {
+function newSuccessfulDunk() {
   dbManager.getWidgetData("crossket")
     .then(data => {
       data.currentSuccess += 1;
       data.allTimeSuccess += 1;
+      dbManager.updateWidgetData(data);
+    });
+}
+
+function newFailDunk() {
+  dbManager.getWidgetData("crossket")
+    .then(data => {
+      data.currentFail += 1;
+      data.allTimeFail += 1;
       dbManager.updateWidgetData(data);
     });
 }
