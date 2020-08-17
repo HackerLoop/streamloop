@@ -9,17 +9,35 @@
 </head>
 <body>
   <div id="app">
-    <div class="content">
-      <h3 class="">Current streamboss: 👑 {{streamboss.user}}</h3>
-      <!-- <p>{{current}} / {{goal}}</p> -->
-      <p>HP: {{goal - current}} / {{goal}}</p>
-      <h3 class="">Top 3</h3>
-      <ol type="1">
-        <li v-for="viewer in viewers.slice(0, 3)" v-if="viewer.sessionPoints > 0">
-          {{ viewer.user }} - {{ viewer.sessionPoints }}pts
-        </li>
-      </ol>
-      <img v-bind:src="userImg" width="300" height="300" alt="">
+    <div class="streamloop-container">
+      <div class="current-streamboss">
+        <div class="avatar">
+          <img class="avatar-img" v-bind:src="bossImg || 'https://static-cdn.jtvnw.net/jtv_user_pictures/15982081-1895-4737-ae19-ed69dca83f5f-profile_image-300x300.jpg'" alt="">
+        </div>
+        <div class="content">
+          <p class="title">CROSSOS KING</p>
+          <h1 class="username">{{streamboss.user || 'mrpierrecroce'}}</h1>
+          <div class="progress-container">
+            <div class="progress">
+              <span class="progress-bar" :style="{width: ((goal-current)/goal) * 100 + '%'}"></span>
+            </div>
+            <div class="progress-infos">
+              <div class="progress-alert" v-if="showAlert">
+                <span class="message">KWIIISKA ATTAQUE !</span> <span class="pts">-300</span> <img class="lightning" src="/assets/lightning.svg" alt="">
+              </div>
+              <span class="hp">{{goal - current}} PV</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="top-3">
+        <p class="top-title">TOP CHALLENGERS</p>
+        <ul class="top-list">
+          <li class="top-item" :class="[`item-${index+1}`]" v-for="(viewer, index) in viewers.slice(0, 3)" v-if="viewer.sessionPoints > 0">
+            {{ viewer.user }} <span class="pts">{{ viewer.sessionPoints }} dégâts</span>
+          </li>
+        </ul>
+      </div>
     </div>
   </div>
 </body>
@@ -39,7 +57,9 @@ var app = new Vue({
     isPlaying: false,
     goal: 0,
     current: 0,
-    userImg: ''
+    userImg: '',
+    bossImg: '',
+    showAlert: false
   },
   created () {
 
@@ -51,6 +71,11 @@ var app = new Vue({
       this.streamboss = data.boss;
       this.goal = data.goal;
       this.current = data.current;
+
+      axios.get('https://decapi.me/twitch/avatar/'+this.streamboss.user)
+      .then((response) => {
+        this.bossImg = response.data;
+      })
     });
 
     socket.on('VIEWERS_LIST', (obj) => {
@@ -88,17 +113,18 @@ var app = new Vue({
       }
       const event = queue.shift();
 
-      axios.get('https://decapi.me/twitch/avatar/'+event.user)
-      .then((response) => {
-        console.log(response.data);
-        this.userImg = response.data;
-        this.playAlert();
-      })
+      // axios.get('https://decapi.me/twitch/avatar/'+event.user)
+      // .then((response) => {
+      //   console.log(response.data);
+      //   this.userImg = response.data;
+      //   this.playAlert();
+      // })
+      this.playAlert();
     },
 
     playAlert(event) {
 
-      audio.play();
+      //audio.play();
       this.isPlaying = true;
 
       setTimeout(() => {
@@ -115,10 +141,14 @@ var app = new Vue({
 </script>
 
 <style lang="scss" scoped>
-  @import url('https://fonts.googleapis.com/css2?family=Anton&family=Montserrat&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,900;1,400;1,700&display=swap');
+
+  body {
+    background-color: #ccc;
+  }
 
   html, body {
-    font-family: 'Montserrat', sans-serif;
+    font-family: 'Barlow', sans-serif;
     margin: 0;
     padding: 0;
   }
@@ -127,8 +157,185 @@ var app = new Vue({
     box-sizing: border-box;
   }
 
-  /* CUSTOM CSS */
+  p, ul, span {
+    margin: 0;
+  }
 
+  /* CUSTOM CSS */
+  #app {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .streamloop-container {
+    max-width: 485px;
+    width: 100%;
+    margin: 0 auto;
+    color: white;
+    margin-top: 10px;
+  }
+
+  .current-streamboss {
+    display: flex;
+    flex-direction: row;
+  }
+    .avatar {
+      position: relative;
+      width: 155px;
+      height: 188px;
+      background-image: url('/assets/king.svg');
+      background-repeat: no-repeat;
+      margin-right: 10px;
+      margin-bottom: 5px;
+    }
+      .avatar-img {
+        position:  absolute;
+        top: 50px;
+        left: 17px;
+        width: 114px;
+        height: 114px;
+        display: block;
+        /* background-color: rgba(255, 255, 255, 1); */
+        border-radius: 3px;
+        overflow: hidden;
+      }
+
+    .current-streamboss .content {
+      padding-top: 54px;
+      flex: 1;
+    }
+      .current-streamboss .title {
+        font-style: italic;
+        font-weight: normal;
+        text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.5);
+        margin: 0;
+      }
+      .current-streamboss .username {
+        font-style: normal;
+        font-weight: 900;
+        font-size: 36px;
+        line-height: 1em;
+        text-shadow: 5px 4px 1px rgba(0, 0, 0, 0.45);
+        margin: 0;
+        margin-bottom: 10px;
+      }
+
+    .progress {
+      position: relative;
+      border: 1px solid #FFFFFF;
+      border-radius: 4px;
+      height: 38px;
+      width: 100%;
+      display: block;
+    }
+      .progress-bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        background: #CA003D;
+        border-radius: 3px;
+        display: block;
+        height: 100%;
+        width: 100%;
+      }
+
+    .progress-container {
+      position: relative;
+    }
+
+    .progress-infos {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      text-align: right;
+    }
+      .progress-infos .hp {
+        margin-right: 10px;
+        margin-top: 9px;
+        display: block;
+        position: relative;
+        font-style: normal;
+        font-weight: bold;
+        font-size: 14px;
+        line-height: 17px;
+        text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+        white-space: nowrap;
+      }
+      .progress-alert {
+        position: absolute;
+        z-index: 1;
+        top: 0;
+        left: 0;
+        margin-top: -6px;
+        font-style: italic;
+        font-weight: bold;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        padding-left: 12px;
+      }
+        .progress-alert .message {
+          text-overflow: ellipsis;
+        }
+        .progress-alert .pts {
+          font-weight: 800;
+          font-size: 18px;
+          color: #FF9900;
+          display: inline-block;
+          margin-left: 10px;
+        }
+        .progress-alert .lightning {
+          margin-left: 2px;
+        }
+
+  .top-3 {
+    padding-left: 5px;
+  }
+    .top-title {
+      font-style: italic;
+      font-weight: bold;
+      font-size: 16px;
+      text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+      margin-bottom: 8px;
+      padding-left: 5px;
+    }
+    .top-list {
+      list-style: none;
+      padding: 0;
+    }
+      .top-item {
+        font-style: normal;
+        font-weight: 900;
+        font-size: 18px;
+        text-shadow: 3px 2px 1px rgba(0, 0, 0, 0.45);
+      }
+      .top-item .pts {
+        font-style: italic;
+        font-weight: normal;
+        font-size: 14px;
+        text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+        margin-left: 5px;
+      }
+        .top-item::before {
+          content: '';
+          display: inline-block;
+          background-image: url('/assets/lightning-gold.svg');
+          background-repeat: no-repeat;
+          width: 23px;
+          height: 25px;
+          vertical-align: middle;
+        }
+        .item-1::before {
+          background-image: url('/assets/lightning-gold.svg');
+        }
+        .item-2::before {
+          background-image: url('/assets/lightning-silver.svg');
+        }
+        .item-3::before {
+          background-image: url('/assets/lightning-bronze.svg');
+        }
 </style>
 
 </html>
