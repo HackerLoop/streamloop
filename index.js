@@ -282,7 +282,7 @@ if (parserStreamlabs) {
 
 if (parserTwitch) {
   // OnChannelPoint
-  var channelPointName = process.env.NODE_ENV !== 'production' ? 'Recompense 1': "Recompense 1";
+  var channelPointName = process.env.NODE_ENV !== 'production' ? 'Recompense 1': "S'attaquer au Crossos King";
 
   parserTwitch.addTriggerData('OnChannelPoint', [
     "OnChannelPoint",
@@ -309,6 +309,7 @@ if (parserTwitch) {
 
   controller.triggerCount = controller.triggerCount + 1;
 
+
   parserTwitch.addTriggerData('OnChannelPoint', [
     "OnChannelPoint",
     "*"
@@ -317,6 +318,17 @@ if (parserTwitch) {
     ["FUNCTION", (msg) => {
       console.log("OnChannelPoint *");
       console.dir(msg, { depth: null });
+      // var newEvent = {
+      //   listener: 'OnChannelPoint',
+      //   event: msg.data
+      // }
+      // dbManager.addEvent(newEvent);
+      //
+      // dbManager.getWidgetData("streamboss")
+      //   .then(data => {
+      //     var points = msg.data.redemption.reward.cost * data.rewardPoint;
+      //     addViewerPoints(points, msg, data);
+      //   });
     }]
   ];
 
@@ -337,7 +349,7 @@ function delay(t, val) {
 function addViewerPoints(points, userData, widgetData) {
   dbManager.getViewer(userData.user)
     .then(viewer => {
-      points = Math.round(points);
+      points = Math.ceil(points);
       if (viewer) {
         viewer.sessionPoints += points;
         viewer.points += points;
@@ -349,9 +361,13 @@ function addViewerPoints(points, userData, widgetData) {
         viewer.bossCount = 0;
       }
 
+      viewer.lastHit = points;
+
       widgetData.current += points;
       if (widgetData.current >= widgetData.goal) {
         console.log("new streamBoss:", viewer.user);
+        viewer.widgetCurrent = widgetData.goal;
+        viewer.time = new Date();
         widgetData.boss = viewer;
         widgetData.bossHistory.push({
           user: viewer.user,
@@ -359,16 +375,16 @@ function addViewerPoints(points, userData, widgetData) {
           points: viewer.points,
           time: new Date()
         });
-        // widgetData.current = widgetData.current - widgetData.goal;
-        // viewer.sessionPoints = widgetData.current;
         if (!viewer.bossCount) {
           viewer.bossCount = 0;
         }
         viewer.bossCount++;
+        viewer.sessionPoints = 0;
         dbManager.updateViewer(viewer);
         dbManager.resetSessionLeaderboard(widgetData);
       }
       else {
+        viewer.widgetCurrent = widgetData.current;
         dbManager.updateViewer(viewer);
         dbManager.updateWidgetData(widgetData);
       }
