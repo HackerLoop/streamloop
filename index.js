@@ -282,7 +282,7 @@ if (parserStreamlabs) {
 
 if (parserTwitch) {
   // OnChannelPoint
-  var channelPointName = process.env.NODE_ENV !== 'production' ? 'Recompense 1': "S'attaquer au Crossos King";
+  var channelPointName = process.env.REWARD_TRIGGER || 'Recompense 1';
 
   parserTwitch.addTriggerData('OnChannelPoint', [
     "OnChannelPoint",

@@ -10,8 +10,8 @@
 <body>
   <div id="app">
     <div class="streamloop-container">
-      <div class="alert animated dunk" v-bind:class="[status]" v-show="alertMsg">
-        <img class="fireball" v-bind:src="alertImg" alt="">
+      <div class="alert animated dunk" v-bind:class="[status]" v-show="showAlert">
+        <img id="alertImg" class="fireball" v-bind:src="alertImg" alt="">
         <p class="dunk-score">{{alertMsg}}</p>
       </div>
     </div>
@@ -27,6 +27,11 @@ audioFailDunk.volume = 1;
 var audioSuccessDunk = new Audio('/assets/sfx/pierre-rentredanslematch.mp3');
 audioSuccessDunk.volume = 1;
 
+var fireball = new Image();
+fireball.src = '/assets/basketball-anim-final.gif';
+fireball.addEventListener('load', () => {
+  fireball = null;
+})
 
 var socket = io('', {query: "user=hackerloop"});
 var app = new Vue({
@@ -34,6 +39,7 @@ var app = new Vue({
   data: {
     isPlaying: false,
     status: 'animationIn',
+    showAlert: false,
     alertMsg: '',
     alertImg: '',
     currentDunkFail: -1,
@@ -57,12 +63,15 @@ var app = new Vue({
         console.log("new Successful Dunk");
         var event = {};
         event.beforePlaying = (next) => {
+          console.log('beforePlaying');
           this.alertMsg = data.currentSuccess;
           this.alertImg = '/assets/basketball-anim-final.gif';
+          this.showAlert = true;
           audioSuccessDunk.play();
           if (next) next();
         }
         event.afterPlaying = (next) => {
+          this.showAlert = false;
           this.alertMsg = '';
           this.alertImg = '';
           if (next) next();
