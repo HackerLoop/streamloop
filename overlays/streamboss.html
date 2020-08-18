@@ -60,6 +60,7 @@ var app = new Vue({
   data: {
     streamboss: {},
     viewers: [],
+    widgetViewers: [],
     isPlaying: false,
     goal: 0,
     current: 0,
@@ -98,11 +99,13 @@ var app = new Vue({
 
     socket.on('VIEWERS_LIST', (obj) => {
       console.log('VIEWERS_LIST', obj);
-      this.viewers = obj;
+      this.widgetViewers = obj;
+      this.playEvent();
     });
 
-    socket.on('VIEWER_EVENT', (obj) => {
-      console.log(obj);
+    socket.on('VIEWER_EVENT', ({viewer, viewersList}) => {
+      console.log(viewer, viewersList);
+      var obj = viewer;
       if (obj.widgetCurrent == this.goal) {
         // If new streamboss
         var event = {
@@ -127,6 +130,7 @@ var app = new Vue({
               this.shake = false;
               this.alertData = {};
               this.current = this.widgetCurrent;
+              this.viewers = viewersList;
               if (next) next();
             }, 1000);
           })
@@ -138,6 +142,7 @@ var app = new Vue({
         obj.beforePlaying = (next) => {
           this.alertData = obj;
           gsap.to(this.$data, { duration: .5, current: obj.widgetCurrent});
+          this.viewers = viewersList;
           if (next) next();
         }
         obj.afterPlaying = (next) => {
@@ -170,6 +175,7 @@ var app = new Vue({
       if (!queue.length) {
         console.log('queue is empty');
         this.current = this.widgetCurrent;
+        this.viewers = this.widgetViewers;
         return;
       }
       const event = queue.shift();

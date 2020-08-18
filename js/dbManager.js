@@ -98,7 +98,10 @@ const updateViewer = async (data) => {
     }).toArray();
     if (socketio) {
       socketio.emit("VIEWERS_LIST", ViewersData);
-      socketio.emit("VIEWER_EVENT", Viewer);
+      socketio.emit("VIEWER_EVENT", {
+        viewer: Viewer,
+        viewersList: ViewersData
+      });
     }
   } catch(err) {
     console.log(err);
