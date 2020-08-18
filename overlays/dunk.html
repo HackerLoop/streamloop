@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dunk</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏀</text></svg>">
+</head>
+<body>
+  <div id="app">
+    <div class="streamloop-container">
+      <div class="alert animated dunk" v-bind:class="[status]" v-show="alertMsg">
+        <img class="fireball" v-bind:src="alertImg" alt="">
+        <p class="dunk-score">{{alertMsg}}</p>
+      </div>
+    </div>
+  </div>
+</body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.2.4/gsap.min.js"></script>
+<script>
+let queue = [];
+
+var audioFailDunk = new Audio('/assets/sfx/fail-sound-effect.mp3');
+audioFailDunk.volume = 1;
+var audioSuccessDunk = new Audio('/assets/sfx/pierre-rentredanslematch.mp3');
+audioSuccessDunk.volume = 1;
+
+
+var socket = io('', {query: "user=hackerloop"});
+var app = new Vue({
+  el: '#app',
+  data: {
+    isPlaying: false,
+    status: 'animationIn',
+    alertMsg: '',
+    alertImg: '',
+    currentDunkFail: -1,
+    currentDunkSuccess: -1
+  },
+  created () {
+
+    socket.on('WIDGETS_DATA', (obj) => {
+      var data = obj.find(elem => {
+        return elem.name == "crossket"
+      })
+      console.log(data);
+      if (this.currentDunkSuccess == -1) this.currentDunkSuccess = data.currentSuccess;
+      if (this.currentDunkFail == -1) this.currentDunkFail = data.currentFail;
+
+      if (data.currentSuccess == 0) this.currentDunkSuccess = 0;
+      if (data.currentFail == 0) this.currentDunkFail = 0;
+
+      if (this.currentDunkSuccess != data.currentSuccess) {
+        // new Successful Dunk
+        console.log("new Successful Dunk");
+        var event = {};
+        event.beforePlaying = (next) => {
+          this.alertMsg = data.currentSuccess;
+          this.alertImg = '/assets/basketball-anim-final.gif';
+          audioSuccessDunk.play();
+          if (next) next();
+        }
+        event.afterPlaying = (next) => {
+          this.alertMsg = '';
+          this.alertImg = '';
+          if (next) next();
+        }
+        event.duration = 2000;
+        queue.push(event);
+      }
+      if (this.currentDunkFail != data.currentFail) {
+        // new Fail Dunk
+        console.log("new Fail Dunk");
+        audioFailDunk.currentTime = 0;
+        audioFailDunk.play();
+        // var eventFail = {};
+        // eventFail.beforePlaying = (next) => {
+        //   audioFailDunk.play();
+        //   if (next) next();
+        // }
+        // eventFail.afterPlaying = (next) => {
+        //   if (next) next();
+        // }
+        // eventFail.duration = 900;
+        // queue.push(eventFail);
+      }
+      this.currentDunkSuccess = data.currentSuccess;
+      this.currentDunkFail = data.currentFail;
+      this.playEvent();
+    });
+
+    socket.on('RELOAD_OVERLAY', () => {
+      console.log("RELOAD");
+      location.reload();
+    });
+  },
+
+  methods: {
+    playEvent() {
+      if (this.isPlaying) {
+        console.log('Alert is still playing');
+        return;
+      }
+      if (!queue.length) {
+        console.log('queue is empty');
+        this.afterQueueFinished();
+        return;
+      }
+      const event = queue.shift();
+
+      event.beforePlaying((data) => {
+        this.playAlert(event);
+      })
+    },
+
+    playAlert(event) {
+      this.isPlaying = true;
+      this.status = 'animationIn';
+
+      setTimeout(() => {
+        console.log('Alert is done playing');
+
+        this.status = 'animationOut';
+        setTimeout(() => {
+          this.isPlaying = false;
+          event.afterPlaying();
+          this.playEvent();
+        }, 1000);
+      }, event.duration || 4000);
+    },
+
+    afterQueueFinished() {
+      // Do something when queue is done
+    }
+  }
+})
+</script>
+
+<style type="text/css" lang="scss" scoped>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow:wght@900&display=swap');
+
+  body {
+    background-color: #9147ff;
+  }
+
+  html, body {
+    font-family: 'Barlow', sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+
+  *, *:before, *:after {
+    box-sizing: border-box;
+  }
+
+  p, ul, span {
+    margin: 0;
+  }
+
+  /* CUSTOM CSS */
+  #app {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .streamloop-container {
+    margin: 0 auto;
+    color: white;
+    margin-top: 10px;
+  }
+
+  .dunk {
+    position: relative;
+    max-width: 100px;
+    width: 100%;
+  }
+
+    .fireball {
+      width: 100%;
+      height: auto;
+    }
+
+    .dunk-score {
+      position: absolute;
+      top: 105px;
+      left: 0;
+      width: 100%;
+      display: block;
+      text-align: center;
+      font-weight: 900;
+      font-size: 34px;
+      color: white;
+      opacity: 0;
+      transform-origin: 60% 50%;
+    }
+
+  .animationIn .dunk-score {
+    animation: .15s ease-out .3s 1 zoomIn forwards;
+  }
+
+  .animationOut .dunk-score {
+    opacity: 1;
+    animation: .2s ease-out .4s 1 zoomOut forwards;
+  }
+
+  @keyframes fadeIn {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fadeOut {
+    0% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes zoomIn {
+    0% {
+      transform: scale(0);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes zoomOut {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(0);
+      opacity: 0;
+    }
+  }
+</style>
+
+</html>
