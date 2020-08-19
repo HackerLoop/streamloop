@@ -68,12 +68,8 @@ app.get(`/api/mrpierrecroce/king`, (req, res) => {
 
 app.post('/api/mrpierrecroce/dunk', checkToken, (req, res) => {
   console.log(req.body);
-  if (req.body.success) {
-    newSuccessfulDunk();
-  }
-  else {
-    newFailDunk();
-  }
+  newDunk(req.body.success, req.body.fail);
+  res.send('ok');
 })
 
 app.use('/assets', express.static('./overlays/assets'));
@@ -391,20 +387,35 @@ function addViewerPoints(points, userData, widgetData) {
     });
 }
 
-function newSuccessfulDunk() {
+function newDunk(success, fail) {
   dbManager.getWidgetData("crossket")
     .then(data => {
-      data.currentSuccess += 1;
-      data.allTimeSuccess += 1;
+      if (success) {
+        data.currentSuccess += success || 1;
+        data.allTimeSuccess += success || 1;
+      }
+      if (fail) {
+        data.currentFail += fail || 1;
+        data.allTimeFail += fail || 1;
+      }
       dbManager.updateWidgetData(data);
     });
 }
 
-function newFailDunk() {
+function newSuccessfulDunk(number) {
   dbManager.getWidgetData("crossket")
     .then(data => {
-      data.currentFail += 1;
-      data.allTimeFail += 1;
+      data.currentSuccess += number || 1;
+      data.allTimeSuccess += number || 1;
+      dbManager.updateWidgetData(data);
+    });
+}
+
+function newFailDunk(number) {
+  dbManager.getWidgetData("crossket")
+    .then(data => {
+      data.currentFail += number || 1;
+      data.allTimeFail += number || 1;
       dbManager.updateWidgetData(data);
     });
 }
