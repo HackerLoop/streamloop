@@ -241,7 +241,8 @@
 
     computed: {
       sortedBoss: function () {
-        return this.viewers.sort((a, b) => {
+        var viewersCopy = this.viewers;
+        return viewersCopy.sort((a, b) => {
           if (a.bossCount == b.bossCount) {
             return b.points - a.points;
           }
