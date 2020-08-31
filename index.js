@@ -91,10 +91,9 @@ admin.on('connection', function (socket) {
     console.log(m);
   });
 
-
-  socket.on('TEST_DOSSIER', function(type) {
-    testDossier(type);
-  });
+  // socket.on('TEST_DOSSIER', function(type) {
+  //   testDossier(type);
+  // });
 
   socket.on('RESET_STREAMBOSS', function(obj) {
     dbManager.resetSessionLeaderboard(obj);
@@ -162,20 +161,28 @@ if (parserStreamlabs) {
     ["FUNCTION", (msg) => {
       console.log("OnSLDonationNoSync");
       console.log(msg);
-      if (msg.user == process.env.TWITCH_USER) {
+      if (msg.user == process.env.TWITCH_USER && !msg.data.isTest) {
         return false;
       }
+      var test = msg.data.isTest;
 
-      var newEvent = {
-        listener: 'OnSLDonationNoSync',
-        event: msg
+      if (!test) {
+        var newEvent = {
+          listener: 'OnSLDonationNoSync',
+          event: msg
+        }
+        dbManager.addEvent(newEvent);
       }
-      dbManager.addEvent(newEvent);
 
       dbManager.getWidgetData("streamboss")
         .then(data => {
           var points = msg.amount * data.donationPoint;
-          addViewerPoints(points, msg, data);
+          if (!test) {
+            addViewerPoints(points, msg, data);
+          }
+          else {
+            sendTestViewerEvent(points, msg, data);
+          }
         });
     }]
   ];
@@ -189,20 +196,28 @@ if (parserStreamlabs) {
     ["FUNCTION", (msg) => {
       console.log("OnSLTwitchBitsNoSync");
       console.log(msg);
-      if (msg.user == process.env.TWITCH_USER) {
+      if (msg.user == process.env.TWITCH_USER && !msg.data.isTest) {
         return false;
       }
+      var test = msg.data.isTest;
 
-      var newEvent = {
-        listener: 'OnSLTwitchBitsNoSync',
-        event: msg
+      if (!test) {
+        var newEvent = {
+          listener: 'OnSLTwitchBitsNoSync',
+          event: msg
+        }
+        dbManager.addEvent(newEvent);
       }
-      dbManager.addEvent(newEvent);
 
       dbManager.getWidgetData("streamboss")
         .then(data => {
           var points = msg.amount * data.bitsPoint;
-          addViewerPoints(points, msg, data);
+          if (!test) {
+            addViewerPoints(points, msg, data);
+          }
+          else {
+            sendTestViewerEvent(points, msg, data);
+          }
         });
     }]
   ];
@@ -216,22 +231,30 @@ if (parserStreamlabs) {
     ["FUNCTION", (msg) => {
       console.log("OnSLTwitchSubNoSync");
       console.log(msg);
-      if (msg.user == process.env.TWITCH_USER) {
+      if (msg.user == process.env.TWITCH_USER && !msg.data.isTest) {
         return false;
       }
+      var test = msg.data.isTest;
 
-      var newEvent = {
-        listener: 'OnSLTwitchSubNoSync',
-        event: msg
+      if (!test) {
+        var newEvent = {
+          listener: 'OnSLTwitchSubNoSync',
+          event: msg
+        }
+        dbManager.addEvent(newEvent);
       }
-      dbManager.addEvent(newEvent);
 
       dbManager.getWidgetData("streamboss")
         .then(data => {
           var tier = msg.data.sub_plan === 'Prime' ? 1 : (parseInt(msg.data.sub_plan) / 1000);
           var multiplicator = tier < 3 ? tier : tier+2;
           var points = data.subscriptionPoint * multiplicator;
-          addViewerPoints(points, msg, data);
+          if (!test) {
+            addViewerPoints(points, msg, data);
+          }
+          else {
+            sendTestViewerEvent(points, msg, data);
+          }
         });
     }]
   ];
@@ -263,28 +286,37 @@ if (parserStreamlabs) {
     ["FUNCTION", (msg) => {
       console.log("OnSLTwitchGiftSubNoSync");
       console.log(msg);
-      if (msg.gifter == process.env.TWITCH_USER) {
+      if (msg.gifter == process.env.TWITCH_USER && !msg.data.isTest) {
         return false;
       }
+      var test = msg.data.isTest;
 
-      var newEvent = {
-        listener: 'OnSLTwitchGiftSubNoSync',
-        event: msg
+      if (!test) {
+        var newEvent = {
+          listener: 'OnSLTwitchGiftSubNoSync',
+          event: msg
+        }
+        dbManager.addEvent(newEvent);
       }
-      dbManager.addEvent(newEvent);
 
       dbManager.getWidgetData("streamboss")
         .then(data => {
           var tier = msg.data.sub_plan === 'Prime' ? 1 : (parseInt(msg.data.sub_plan) / 1000);
           var multiplicator = tier < 3 ? tier : tier+2;
           var points = data.subscriptionPoint * multiplicator;
-          addViewerPoints(points, {
+          var obj = {
             user: msg.gifter,
             data: {
               name: msg.data.gifter,
               display_name: msg.data.gifter_display_name
             }
-          }, data);
+          };
+          if (!test) {
+            addViewerPoints(points, obj, data);
+          }
+          else {
+            sendTestViewerEvent(points, obj, data);
+          }
         });
     }]
   ];
@@ -303,20 +335,25 @@ if (parserTwitch) {
     ["FUNCTION", (msg) => {
       console.log("OnChannelPoint ", channelPointName);
       console.dir(msg, { depth: null });
-      if (msg.user == process.env.TWITCH_USER) {
-        return false;
-      }
+      var test = msg.user == process.env.TWITCH_USER;
 
-      var newEvent = {
-        listener: 'OnChannelPoint',
-        event: msg.data
+      if (!test) {
+        var newEvent = {
+          listener: 'OnChannelPoint',
+          event: msg.data
+        }
+        dbManager.addEvent(newEvent);
       }
-      dbManager.addEvent(newEvent);
 
       dbManager.getWidgetData("streamboss")
         .then(data => {
           var points = data.rewardPoint;
-          addViewerPoints(points, msg, data);
+          if (!test) {
+            addViewerPoints(points, msg, data);
+          }
+          else {
+            sendTestViewerEvent(points, msg, data);
+          }
         });
     }]
   ];
@@ -362,6 +399,13 @@ function delay(t, val) {
            resolve(val);
        }, t);
    });
+}
+
+function sendTestViewerEvent(points, userData, widgetData) {
+  points = Math.ceil(points);
+  userData.lastHit = points;
+  userData.widgetCurrent = widgetData.current + points;
+  io.emit("VIEWER_EVENT_TEST", userData);
 }
 
 function addViewerPoints(points, userData, widgetData) {

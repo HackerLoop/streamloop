@@ -160,6 +160,23 @@ var app = new Vue({
       this.playEvent();
     });
 
+    socket.on('VIEWER_EVENT_TEST', (viewer) => {
+      console.log('TEST', viewer);
+      var obj = viewer;
+      obj.beforePlaying = (next) => {
+        this.alertData = obj;
+        gsap.to(this.$data, { duration: .5, current: obj.widgetCurrent});
+        // this.viewers = viewersList;
+        if (next) next();
+      }
+      obj.afterPlaying = (next) => {
+        this.alertData = {};
+        if (next) next();
+      }
+      queue.push(obj);
+      this.playEvent();
+    });
+
     socket.on('RELOAD_OVERLAY', () => {
       console.log("RELOAD");
       location.reload();
