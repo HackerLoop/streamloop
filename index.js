@@ -162,6 +162,9 @@ if (parserStreamlabs) {
     ["FUNCTION", (msg) => {
       console.log("OnSLDonationNoSync");
       console.log(msg);
+      if (msg.user == process.env.TWITCH_USER) {
+        return false;
+      }
 
       var newEvent = {
         listener: 'OnSLDonationNoSync',
@@ -186,6 +189,10 @@ if (parserStreamlabs) {
     ["FUNCTION", (msg) => {
       console.log("OnSLTwitchBitsNoSync");
       console.log(msg);
+      if (msg.user == process.env.TWITCH_USER) {
+        return false;
+      }
+
       var newEvent = {
         listener: 'OnSLTwitchBitsNoSync',
         event: msg
@@ -209,6 +216,10 @@ if (parserStreamlabs) {
     ["FUNCTION", (msg) => {
       console.log("OnSLTwitchSubNoSync");
       console.log(msg);
+      if (msg.user == process.env.TWITCH_USER) {
+        return false;
+      }
+
       var newEvent = {
         listener: 'OnSLTwitchSubNoSync',
         event: msg
@@ -234,11 +245,11 @@ if (parserStreamlabs) {
     ["FUNCTION", (msg) => {
       console.log("OnSLTwitchCommunityGiftSubNoSync");
       console.log(msg);
-      var newEvent = {
-        listener: 'OnSLTwitchCommunityGiftSubNoSync',
-        event: msg
-      }
-      dbManager.addEvent(newEvent);
+      // var newEvent = {
+      //   listener: 'OnSLTwitchCommunityGiftSubNoSync',
+      //   event: msg
+      // }
+      // dbManager.addEvent(newEvent);
 
     }]
   ];
@@ -252,6 +263,10 @@ if (parserStreamlabs) {
     ["FUNCTION", (msg) => {
       console.log("OnSLTwitchGiftSubNoSync");
       console.log(msg);
+      if (msg.gifter == process.env.TWITCH_USER) {
+        return false;
+      }
+
       var newEvent = {
         listener: 'OnSLTwitchGiftSubNoSync',
         event: msg
@@ -288,6 +303,9 @@ if (parserTwitch) {
     ["FUNCTION", (msg) => {
       console.log("OnChannelPoint ", channelPointName);
       console.dir(msg, { depth: null });
+      if (msg.user == process.env.TWITCH_USER) {
+        return false;
+      }
 
       var newEvent = {
         listener: 'OnChannelPoint',
@@ -314,6 +332,10 @@ if (parserTwitch) {
     ["FUNCTION", (msg) => {
       console.log("OnChannelPoint *");
       console.dir(msg, { depth: null });
+      if (msg.user == process.env.TWITCH_USER) {
+        return false;
+      }
+
       // var newEvent = {
       //   listener: 'OnChannelPoint',
       //   event: msg.data
