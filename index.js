@@ -59,10 +59,10 @@ app.get(`/api/mrpierrecroce/score`, (req, res) => {
     });
 })
 
-app.get(`/api/mrpierrecroce/king`, (req, res) => {
+app.get(`/api/mrpierrecroce/boss`, (req, res) => {
   dbManager.getWidgetData("streamboss")
     .then(data => {
-      res.send(''+data.boss.user);
+      res.send(''+(data.boss.user || "Personne"));
     });
 })
 
