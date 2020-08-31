@@ -7,9 +7,9 @@
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👑</text></svg>">
   <style type="text/css" media="screen">
-    /* body {
+    .debug {
       background-color: #9147ff;
-    } */
+    }
   </style>
 </head>
 <body>
@@ -74,7 +74,8 @@ var app = new Vue({
     alertData: {},
     bossImg: '',
     showAlert: true,
-    shake: false
+    shake: false,
+    debug: false
   },
   created () {
 
@@ -163,6 +164,17 @@ var app = new Vue({
       console.log("RELOAD");
       location.reload();
     });
+  },
+
+  mounted () {
+    const urlParams = new URLSearchParams(window.location.search);
+    const debug = urlParams.get('debug');
+    this.debug = debug || null;
+    if (this.debug) {
+      document.body.classList.add('debug');
+    } else {
+      document.body.classList.remove('debug');
+    }
   },
 
   computed: {
@@ -263,7 +275,7 @@ var app = new Vue({
       .avatar-img {
         position:  absolute;
         top: 50px;
-        left: 17px;
+        left: 18px;
         width: 114px;
         height: 114px;
         display: block;
