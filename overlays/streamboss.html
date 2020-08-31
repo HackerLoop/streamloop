@@ -7,9 +7,9 @@
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👑</text></svg>">
   <style type="text/css" media="screen">
-    body {
+    /* body {
       background-color: #9147ff;
-    }
+    } */
   </style>
 </head>
 <body>
@@ -17,11 +17,11 @@
     <div class="streamloop-container">
       <div class="current-streamboss">
         <div class="avatar" :class="{shake: shake}">
-          <img class="avatar-img" v-bind:src="bossImg || 'https://static-cdn.jtvnw.net/jtv_user_pictures/15982081-1895-4737-ae19-ed69dca83f5f-profile_image-300x300.jpg'" alt="">
+          <img class="avatar-img" v-bind:src="bossImg || '/assets/YesNo@2x.png'" alt="">
         </div>
         <div class="content">
-          <p class="title">CROSSOS KING/QUEEN</p>
-          <h1 class="username">{{streamboss.user || 'mrpierrecroce'}}</h1>
+          <p class="title">CROSSOS BOSS</p>
+          <h1 class="username">{{streamboss.user || ' '}}</h1>
           <div class="progress-container">
             <div class="progress">
               <span class="progress-bar" :style="{width: Math.ceil((Math.round(goal-current)/goal) * 100) + '%'}"></span>

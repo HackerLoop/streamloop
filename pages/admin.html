@@ -111,7 +111,7 @@
           <br>
           <hr class="hr">
           <div class="container" v-if="widgetStreamboss">
-            <h1 class="title is-4">👑 StreamBoss</h1>
+            <h1 class="title is-4">👑 Crossos Boss</h1>
             <a target="_blank" :href="`/overlay/${user}/streamboss?secret=${secret}`">
               <span class="icon has-text-info">
                 <i class="fas fa-link"></i>
@@ -123,7 +123,7 @@
             <br>
             <br>
             <div class="content">
-              <h1 class="title is-5">👑 StreamBoss: {{widgetStreamboss.boss.user}}</h1>
+              <h1 class="title is-5">👑 Crossos Boss: {{widgetStreamboss.boss.user}}</h1>
               <h1 class="title is-5">Leaderboard</h1>
               <ol type="1">
                 <li v-for="viewer in viewers.slice(0, 5)" v-if="viewer.sessionPoints > 0">
@@ -161,7 +161,7 @@
           <br>
           <br>
           <div class="content">
-            <h1 class="title is-5">👑 Top StreamBoss</h1>
+            <h1 class="title is-5">👑 Top Crossos Boss</h1>
             <ol type="1">
               <li v-for="viewer in sortedBoss.slice(0, 10)" v-if="viewer.bossCount > 0">
                 👑x{{ viewer.bossCount }} {{ viewer.user }} - {{ viewer.points }}pts
@@ -170,7 +170,7 @@
           </div>
           <br>
           <div class="content">
-            <h1 class="title is-5">StreamBoss History</h1>
+            <h1 class="title is-5">Crossos Boss History</h1>
             <ul>
               <li v-for="viewer in bossHistory.slice(0, 10)">
                 👑{{ viewer.user }}
