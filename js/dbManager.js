@@ -81,7 +81,7 @@ const addEvent = async (eventData) => {
 // }
 
 const getViewer = async (username) => {
-  let data = await Viewers.findOne({user: username});
+  let data = await Viewers.findOne({user: { $regex : new RegExp(`^${username}$`, "i") }});
   return data;
 }
 
