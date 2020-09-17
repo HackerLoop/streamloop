@@ -68,7 +68,9 @@ app.get(`/api/mrpierrecroce/boss`, (req, res) => {
 
 app.post('/api/mrpierrecroce/dunk', checkToken, (req, res) => {
   console.log(req.body);
-  newDunk(req.body.success, req.body.fail);
+  if (req.body.success || req.body.fail) {
+    newDunk(req.body.success, req.body.fail);
+  }
   res.send('ok');
 })
 
