@@ -133,6 +133,7 @@
             </div>
             <br>
             <button class="button is-warning" type="button" @click="resetBossCounter()">Réinitialiser progression</button>
+            <button class="button is-warning" type="button" @click="resetCurrentBoss()">Retirer Crossos Boss actuel</button>
             <br><br>
             <form v-on:submit.prevent="updateWidget('streamboss')">
               <table class="table is-bordered is-striped is-fullwidth">
@@ -259,6 +260,12 @@
 
       resetBossCounter() {
         adminSocket.emit('RESET_STREAMBOSS', this.getWigetData('streamboss'));
+      },
+
+      resetCurrentBoss() {
+        this.widgetStreamboss.current = 0;
+        this.widgetStreamboss.boss = {};
+        socket.emit('UPDATE_WIDGET', this.widgetStreamboss);
       },
 
       resetCrossketCurrent() {
