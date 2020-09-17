@@ -82,7 +82,10 @@ var app = new Vue({
           this.alertMsg = data.currentSuccess;
           this.alertImg = '/assets/basketball-anim-final.gif';
           this.showAlert = true;
-
+          for (var i = 0; i < audioSuccessDunk.length; i++) {
+            audioSuccessDunk[i].pause();
+            audioSuccessDunk[i].currentTime = 0;
+          }
           audioSuccessDunk[Math.floor(Math.random() * audioSuccessDunk.length)].play();
           setTimeout(() => {
             this.showAlert = false;
