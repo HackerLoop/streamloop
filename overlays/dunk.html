@@ -30,8 +30,16 @@ let queue = [];
 
 var audioFailDunk = new Audio('/assets/sfx/fail-sound-effect.mp3');
 audioFailDunk.volume = 1;
-var audioSuccessDunk = new Audio('/assets/sfx/pierre-rentredanslematch.mp3');
-audioSuccessDunk.volume = 1;
+var audioSuccessDunk = [
+  new Audio('/assets/sfx/benjamin1.mp3'),
+  new Audio('/assets/sfx/benjamin2.mp3'),
+  new Audio('/assets/sfx/guillaume1.mp3'),
+  new Audio('/assets/sfx/guillaume2.mp3'),
+  new Audio('/assets/sfx/lucas1.mp3')
+];
+for (var i = 0; i < audioSuccessDunk.length; i++) {
+  audioSuccessDunk[i].volume = 1;
+}
 
 var fireball = new Image();
 fireball.src = '/assets/basketball-anim-final.gif';
@@ -74,7 +82,13 @@ var app = new Vue({
           this.alertMsg = data.currentSuccess;
           this.alertImg = '/assets/basketball-anim-final.gif';
           this.showAlert = true;
-          audioSuccessDunk.play();
+
+          audioSuccessDunk[Math.floor(Math.random() * audioSuccessDunk.length)].play();
+          setTimeout(() => {
+            this.showAlert = false;
+            this.alertMsg = '';
+            this.alertImg = '';
+          }, 2500);
           if (next) next();
         }
         event.afterPlaying = (next) => {
@@ -83,7 +97,7 @@ var app = new Vue({
           this.alertImg = '';
           if (next) next();
         }
-        event.duration = 2000;
+        event.duration = 5000;
         queue.push(event);
       }
       if (this.currentDunkFail != data.currentFail) {
