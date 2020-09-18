@@ -41,6 +41,8 @@ for (var i = 0; i < audioSuccessDunk.length; i++) {
   audioSuccessDunk[i].volume = 1;
 }
 
+var lastAudio = null;
+
 var fireball = new Image();
 fireball.src = '/assets/basketball-anim-final.gif';
 fireball.addEventListener('load', () => {
@@ -86,7 +88,16 @@ var app = new Vue({
             audioSuccessDunk[i].pause();
             audioSuccessDunk[i].currentTime = 0;
           }
-          audioSuccessDunk[Math.floor(Math.random() * audioSuccessDunk.length)].play();
+          var roll = [].concat(audioSuccessDunk);
+          if (lastAudio) {
+            roll.splice(roll.indexOf(lastAudio), 1);
+          }
+          //console.log(roll);
+
+          var audio = roll[Math.floor(Math.random() * roll.length)];
+          lastAudio = audio;
+          audio.play();
+
           setTimeout(() => {
             this.showAlert = false;
             this.alertMsg = '';
