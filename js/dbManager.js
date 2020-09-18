@@ -85,7 +85,16 @@ const getViewer = async (username) => {
   return data;
 }
 
-const updateViewer = async (data) => {
+const getSessionBestViewer = async () => {
+  let data = await Viewers.findOne({
+    sessionPoints: { $gte: 1 }
+  }, {
+    sort: {sessionPoints: -1}
+  });
+  return data;
+}
+
+const updateViewer = async (data, triggerEvent=true) => {
   // console.log("updateViewerData", data);
   if (data._id) {
     delete data._id;
@@ -96,7 +105,7 @@ const updateViewer = async (data) => {
     let ViewersData = await Viewers.find({}, {
       sort: {sessionPoints: -1}
     }).toArray();
-    if (socketio) {
+    if (socketio && triggerEvent) {
       socketio.emit("VIEWERS_LIST", ViewersData);
       socketio.emit("VIEWER_EVENT", {
         viewer: Viewer,
@@ -113,7 +122,8 @@ const resetSessionLeaderboard = async (obj) => {
   obj.current = 0;
   try {
     await Viewers.updateMany({}, {$set: {
-      sessionPoints: 0
+      sessionPoints: 0,
+      newBoss: null
     }});
     let ViewersData = await Viewers.find({}, {
       sort: {sessionPoints: -1}
@@ -132,7 +142,7 @@ const getWidgetData = async (widgetName) => {
   return data;
 }
 
-const updateWidgetData = async (data) => {
+const updateWidgetData = async (data, force=false) => {
   // console.log("updateWidgetData", data);
   if (data._id) {
     delete data._id;
@@ -142,6 +152,9 @@ const updateWidgetData = async (data) => {
     let widgetsData = await Widgets.find().toArray();
     if (socketio) {
       socketio.emit("WIDGETS_DATA", widgetsData);
+      if (force) {
+        socketio.emit("WIDGETS_DATA_FORCE", widgetsData);
+      }
     }
   } catch(err) {
     console.log(err);
@@ -154,6 +167,7 @@ module.exports = {
   getWidgetData,
   updateWidgetData,
   getViewer,
+  getSessionBestViewer,
   updateViewer,
   resetSessionLeaderboard
 }

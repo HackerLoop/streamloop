@@ -32,9 +32,13 @@ exports.connect = function(channelId, onMessage) {
 	};
 
 	setInterval(function() {
-		socket.send(JSON.stringify({
-			"type": "PING"
-		}));
+		try {
+			socket.send(JSON.stringify({
+				"type": "PING"
+			}));
+		} catch (e) {
+			console.log(e);
+		}
 	}, 240000);
 
 	// Ws OnClose : try reconnect

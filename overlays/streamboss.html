@@ -75,25 +75,39 @@ var app = new Vue({
     bossImg: '',
     showAlert: true,
     shake: false,
-    debug: false
+    debug: false,
+    firstLoad: true
   },
   created () {
+
+    socket.on('WIDGETS_DATA_FORCE', (obj) => {
+      var data = obj.find(elem => {
+        return elem.name == "streamboss"
+      });
+
+      this.goal = data.goal;
+      this.streamboss = data.boss;
+      this.bossImg = this.streamboss.user ? this.bossImg : '';
+      this.widgetCurrent = data.current;
+    });
 
     socket.on('WIDGETS_DATA', (obj) => {
       var data = obj.find(elem => {
         return elem.name == "streamboss"
       })
-      console.log(data);
+      console.log("WIDGETS_DATA", data);
       this.goal = data.goal;
 
       // Fist load
-      if (!this.streamboss.time && data.boss.user) {
+      if (this.firstLoad && data.boss.user) {
+        console.log("First time loading data");
         this.streamboss = data.boss;
         axios.get('https://decapi.me/twitch/avatar/'+data.boss.user)
         .then((response) => {
           this.bossImg = response.data;
         })
       }
+      this.firstLoad = false;
 
       // If new streamboss
       //this.streamboss = data.boss;
@@ -110,12 +124,14 @@ var app = new Vue({
     });
 
     socket.on('VIEWER_EVENT', ({viewer, viewersList}) => {
-      console.log(viewer, viewersList);
+      console.log("VIEWER_EVENT", viewer, viewersList);
       var obj = viewer;
-      if (obj.widgetCurrent == this.goal) {
+      if (obj.newBoss) {
+        console.log("New boss:", obj.newBoss.user);
         // If new streamboss
         var event = {
-          data: obj
+          data: obj,
+          viewersList: viewersList
         };
         event.beforePlaying = (next) => {
           this.alertData = obj;
@@ -128,15 +144,17 @@ var app = new Vue({
           if (next) next();
         }
         event.afterPlaying = (next) => {
-          axios.get('https://decapi.me/twitch/avatar/'+event.data.user)
+          console.log("afterPlaying");
+          var newBoss = event.data.newBoss;
+          axios.get('https://decapi.me/twitch/avatar/'+newBoss.user)
           .then((response) => {
-            this.streamboss = event.data;
+            this.streamboss = newBoss;
             this.bossImg = response.data;
             setTimeout(() => {
               this.shake = false;
               this.alertData = {};
               this.current = this.widgetCurrent;
-              this.viewers = viewersList;
+              //this.viewers = this.widgetViewers;
               if (next) next();
             }, 1000);
           })
@@ -145,10 +163,11 @@ var app = new Vue({
         queue.push(event);
       }
       else {
+        obj.viewersList = viewersList;
         obj.beforePlaying = (next) => {
           this.alertData = obj;
           gsap.to(this.$data, { duration: .5, current: obj.widgetCurrent});
-          this.viewers = viewersList;
+          this.viewers = obj.viewersList;
           if (next) next();
         }
         obj.afterPlaying = (next) => {

@@ -116,7 +116,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('UPDATE_WIDGET', function(obj) {
-    dbManager.updateWidgetData(obj);
+    dbManager.updateWidgetData(obj, true);
   });
 
   socket.on('error', function(error) {
@@ -429,23 +429,38 @@ function addViewerPoints(points, userData, widgetData) {
 
       widgetData.current += points;
       if (widgetData.current >= widgetData.goal) {
-        console.log("new streamBoss:", viewer.user);
-        viewer.widgetCurrent = widgetData.goal;
-        viewer.time = new Date();
-        widgetData.boss = viewer;
-        widgetData.bossHistory.push({
-          user: viewer.user,
-          sessionPoints: viewer.sessionPoints,
-          points: viewer.points,
-          time: new Date()
-        });
-        if (!viewer.bossCount) {
-          viewer.bossCount = 0;
-        }
-        viewer.bossCount++;
-        viewer.sessionPoints = 0;
-        dbManager.updateViewer(viewer);
-        dbManager.resetSessionLeaderboard(widgetData);
+        viewer.widgetCurrent = widgetData.current;
+        dbManager.updateViewer(viewer, false)
+          .then(data => {
+            dbManager.getSessionBestViewer()
+              .then(newBoss => {
+                console.log("new streamBoss:", newBoss.user);
+                if (!newBoss) return;
+
+                viewer.widgetCurrent = widgetData.goal;
+
+                widgetData.boss = newBoss;
+                widgetData.bossHistory.push({
+                  user: newBoss.user,
+                  sessionPoints: newBoss.sessionPoints,
+                  points: newBoss.points,
+                  time: new Date()
+                });
+                if (!newBoss.bossCount) {
+                  newBoss.bossCount = 0;
+                }
+                newBoss.bossCount++;
+                dbManager.updateViewer(newBoss, false);
+
+                viewer.newBoss = newBoss;
+                dbManager.updateViewer(viewer, true)
+                  .then(() => {
+                    setTimeout(() => {
+                      dbManager.resetSessionLeaderboard(widgetData);
+                    }, 2000);
+                  });
+              });
+          });
       }
       else {
         viewer.widgetCurrent = widgetData.current;
