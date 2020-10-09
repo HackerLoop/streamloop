@@ -162,6 +162,57 @@
           <br>
           <br>
           <div class="content">
+            <h1 class="title is-5">Tableau de bord</h1>
+            <div class="notification">
+              <div class="columns">
+                <div class="column">
+                  <p class="subtitle">{{allTimeStats.total_donation ? allTimeStats.total_donation.toFixed(2) : 0}} €</p>
+                  <div class="content">Dons</div>
+                </div>
+                <div class="column">
+                  <p class="subtitle">{{allTimeStats.sub}}</p>
+                  <div class="content">Abonnements</div>
+                </div>
+                <div class="column">
+                  <p class="subtitle">{{allTimeStats.bits}}</p>
+                  <div class="content">Bits</div>
+                </div>
+                <div class="column">
+                  <p class="subtitle">~{{allTimeStats.total ? allTimeStats.total.toFixed(2) : 0}} €</p>
+                  <div class="content">Recettes</div>
+                </div>
+              </div>
+            </div>
+            <div class="notification stats-block">
+              <div class="" v-for="stat in stats" v-if="">
+                <div class="columns">
+                  <div class="column">
+                    {{new Date(stat.date).toLocaleDateString('fr-FR')}}
+                  </div>
+                  <div class="column">
+                    <p class="subtitle is-6">{{stat.total_donation ? stat.total_donation.toFixed(2) : 0}} €</p>
+                    <div class="content is-small">Dons</div>
+                  </div>
+                  <div class="column">
+                    <p class="subtitle is-6">{{stat.sub}}</p>
+                    <div class="content is-small">Abonnements</div>
+                  </div>
+                  <div class="column">
+                    <p class="subtitle is-6">{{stat.bits}}</p>
+                    <div class="content is-small">Bits</div>
+                  </div>
+                  <div class="column">
+                    <p class="subtitle is-6">~{{stat.total ? stat.total.toFixed(2) : 0}} €</p>
+                    <div class="content is-small">Recettes</div>
+                  </div>
+                </div>
+                <hr class="hr" style="background-color: white; margin-top: 10px;">
+              </div>
+            </div>
+          </div>
+          <br>
+          <br>
+          <div class="content">
             <h1 class="title is-5">👑 Top Crossos Boss</h1>
             <ol type="1">
               <li v-for="viewer in sortedBoss.slice(0, 10)" v-if="viewer.bossCount > 0">
@@ -201,7 +252,9 @@
       resourcesGallery: [],
       events: [],
       viewers: [],
-      bossHistory: []
+      bossHistory: [],
+      stats: {},
+      allTimeStats: {}
     },
     created () {
       window.onbeforeunload = () => {
@@ -222,6 +275,74 @@
       socket.on('EVENT_LIST', (obj) => {
         console.log('EVENT_LIST',obj);
         this.events = obj;
+        this.stats = {};
+        this.allTimeStats = {
+          total: 0,
+          donation: 0,
+          total_donation: 0,
+          sub: 0,
+          total_sub: 0,
+          bits: 0,
+          total_bits: 0
+        };
+        for (const key in obj) {
+          let event = obj[key];
+          if (event.createdAt && event.createdAt.$date) {
+            let date = event.createdAt.$date.split('T')[0];
+            if (!this.stats[date]) {
+              this.stats[date] = {
+                date: date,
+                total: 0,
+                donation: 0,
+                total_donation: 0,
+                sub: 0,
+                total_sub: 0,
+                bits: 0,
+                total_bits: 0
+              };
+            }
+            if (event.listener == "OnSEDonation" || event.listener == "OnSLDonationNoSync") {
+              //console.log("OnSEDonation", event.event);
+              var amount = parseInt(event.event.amount);
+              this.stats[date].donation += 1;
+              this.stats[date].total_donation += amount || 0;
+              this.stats[date].total += amount || 0;
+            }
+            if (event.listener == "OnSLTwitchSubNoSync") {
+              //console.log("OnSLTwitchSubNoSync", event.event);
+              this.stats[date].sub += 1;
+              let amount = this.getSubPlanAmount(parseInt(event.event.data.sub_plan) / 1000);
+              this.stats[date].total_sub += amount;
+              this.stats[date].total += amount;
+            }
+            if (event.listener == "OnSLTwitchGiftSubNoSync") {
+              //console.log("OnSLTwitchGiftSubNoSync", event.event);
+              let amount = this.getSubPlanAmount(parseInt(event.event.data.sub_plan) / 1000);
+              this.stats[date].sub += 1;
+              this.stats[date].total_sub += amount;
+              this.stats[date].total += amount;
+            }
+            if (event.listener == "OnSLTwitchBitsNoSync") {
+              // console.log("OnSLTwitchBitsNoSync", event.event);
+              var amount = this.getBitsAmount(event.event.amount);
+              this.stats[date].bits += parseInt(event.event.amount);
+              this.stats[date].total_bits += amount;
+              this.stats[date].total += amount;
+            }
+          }
+        }
+        for (const key in this.stats) {
+          let entrie = this.stats[key];
+          this.allTimeStats.total += entrie.total;
+          this.allTimeStats.donation += entrie.donation;
+          this.allTimeStats.total_donation += entrie.total_donation;
+          this.allTimeStats.sub += entrie.sub;
+          this.allTimeStats.total_sub += entrie.total_sub;
+          this.allTimeStats.bits += entrie.bits;
+          this.allTimeStats.total_bits += entrie.total_bits;
+        }
+        console.log('STATS', this.stats);
+        console.log('ALL TIME STATS', this.allTimeStats);
       });
 
       socket.on('VIEWERS_LIST', (obj) => {
@@ -294,6 +415,21 @@
         return this.widgetsData.find(elem => {
           return elem.name == name
         })
+      },
+
+      getSubPlanAmount(plan) {
+        let amount = 4.99;
+        if (plan == 2) {
+          amount = 9.99
+        }
+        else if (plan == 3) {
+          amount = 24.99
+        }
+        return amount;
+      },
+
+      getBitsAmount(bits) {
+        return parseInt(bits) * 0.014;
       }
     }
   })
@@ -339,6 +475,11 @@
   .widget {
     overflow: auto;
     height: 100vh;
+  }
+
+  .stats-block {
+    max-height: 350px;
+    overflow-y: auto;
   }
 </style>
 
