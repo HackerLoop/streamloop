@@ -34,7 +34,7 @@
                   {{item.event.data.amount}} €
                 </p>
                 <p class="content is-small">{{item.event.data.message}}</p>
-
+                <span class="tag">{{item.createdAt.$date}}</span>
               </div>
               <div class="" v-else-if="item.listener == 'OnSLDonationNoSync'">
                 <p>
@@ -43,7 +43,7 @@
                   {{item.event.formatted}}
                 </p>
                 <p class="content is-small">{{item.event.message}}</p>
-
+                <span class="tag">{{item.createdAt.$date}}</span>
               </div>
               <div class="" v-else-if="item.listener == 'OnSLTwitchSubNoSync'">
                 <p>
@@ -51,13 +51,14 @@
                   s'est abonné : {{item.event.tier}}
                 </p>
                 <p class="content is-small">{{item.event.message}}</p>
-
+                <span class="tag">{{item.createdAt.$date}}</span>
               </div>
               <div class="" v-else-if="item.listener == 'OnSLTwitchGiftSubNoSync'">
                 <p>
                   {{item.event.gifter}}
                   offre un abonnement {{item.event.tier}} à : {{item.event.user}}
                 </p>
+                <span class="tag">{{item.createdAt.$date}}</span>
               </div>
               <div class="" v-else-if="item.listener == 'OnSLTwitchBitsNoSync'">
                 <p>
@@ -65,7 +66,7 @@
                   a donné : {{item.event.amount}} bits
                 </p>
                 <p class="content is-small">{{item.event.message}}</p>
-
+                <span class="tag">{{item.createdAt.$date}}</span>
               </div>
               <div v-else>
                 {{item.listener}}
@@ -166,8 +167,16 @@
             <div class="notification">
               <div class="columns">
                 <div class="column">
+                  <p class="subtitle">{{allTimeStats.total_events}}</p>
+                  <div class="content">Intéractions</div>
+                </div>
+                <div class="column">
+                  <p class="subtitle">{{allTimeStats.cp_reward}}</p>
+                  <div class="content">Récompenses</div>
+                </div>
+                <div class="column">
                   <p class="subtitle">{{allTimeStats.total_donation ? allTimeStats.total_donation.toFixed(2) : 0}} €</p>
-                  <div class="content">Dons</div>
+                  <div class="content">{{allTimeStats.donation}} Dons</div>
                 </div>
                 <div class="column">
                   <p class="subtitle">{{allTimeStats.sub}}</p>
@@ -179,7 +188,7 @@
                 </div>
                 <div class="column">
                   <p class="subtitle">~{{allTimeStats.total ? allTimeStats.total.toFixed(2) : 0}} €</p>
-                  <div class="content">Recettes</div>
+                  <div class="content">Total Brut</div>
                 </div>
               </div>
             </div>
@@ -190,8 +199,16 @@
                     {{new Date(stat.date).toLocaleDateString('fr-FR')}}
                   </div>
                   <div class="column">
+                    <p class="subtitle is-6">{{stat.total_events}}</p>
+                    <div class="content is-small">Intéractions</div>
+                  </div>
+                  <div class="column">
+                    <p class="subtitle is-6">{{stat.cp_reward}}</p>
+                    <div class="content is-small">Récompenses</div>
+                  </div>
+                  <div class="column">
                     <p class="subtitle is-6">{{stat.total_donation ? stat.total_donation.toFixed(2) : 0}} €</p>
-                    <div class="content is-small">Dons</div>
+                    <div class="content is-small">{{stat.donation}} Dons</div>
                   </div>
                   <div class="column">
                     <p class="subtitle is-6">{{stat.sub}}</p>
@@ -203,7 +220,7 @@
                   </div>
                   <div class="column">
                     <p class="subtitle is-6">~{{stat.total ? stat.total.toFixed(2) : 0}} €</p>
-                    <div class="content is-small">Recettes</div>
+                    <div class="content is-small">Total Brut</div>
                   </div>
                 </div>
                 <hr class="hr" style="background-color: white; margin-top: 10px;">
@@ -283,51 +300,66 @@
           sub: 0,
           total_sub: 0,
           bits: 0,
-          total_bits: 0
+          total_bits: 0,
+          bits_events: 0,
+          cp_reward: 0,
+          total_events: 0
         };
         for (const key in obj) {
           let event = obj[key];
           if (event.createdAt && event.createdAt.$date) {
             let date = event.createdAt.$date.split('T')[0];
-            if (!this.stats[date]) {
-              this.stats[date] = {
-                date: date,
-                total: 0,
-                donation: 0,
-                total_donation: 0,
-                sub: 0,
-                total_sub: 0,
-                bits: 0,
-                total_bits: 0
-              };
-            }
-            if (event.listener == "OnSEDonation" || event.listener == "OnSLDonationNoSync") {
-              //console.log("OnSEDonation", event.event);
-              var amount = parseInt(event.event.amount);
-              this.stats[date].donation += 1;
-              this.stats[date].total_donation += amount || 0;
-              this.stats[date].total += amount || 0;
-            }
-            if (event.listener == "OnSLTwitchSubNoSync") {
-              //console.log("OnSLTwitchSubNoSync", event.event);
-              this.stats[date].sub += 1;
-              let amount = this.getSubPlanAmount(parseInt(event.event.data.sub_plan) / 1000);
-              this.stats[date].total_sub += amount;
-              this.stats[date].total += amount;
-            }
-            if (event.listener == "OnSLTwitchGiftSubNoSync") {
-              //console.log("OnSLTwitchGiftSubNoSync", event.event);
-              let amount = this.getSubPlanAmount(parseInt(event.event.data.sub_plan) / 1000);
-              this.stats[date].sub += 1;
-              this.stats[date].total_sub += amount;
-              this.stats[date].total += amount;
-            }
-            if (event.listener == "OnSLTwitchBitsNoSync") {
-              // console.log("OnSLTwitchBitsNoSync", event.event);
-              var amount = this.getBitsAmount(event.event.amount);
-              this.stats[date].bits += parseInt(event.event.amount);
-              this.stats[date].total_bits += amount;
-              this.stats[date].total += amount;
+            if (new Date(date) >= new Date("2020-09-17")) {
+              if (!this.stats[date]) {
+                this.stats[date] = {
+                  date: date,
+                  total: 0,
+                  donation: 0,
+                  total_donation: 0,
+                  sub: 0,
+                  total_sub: 0,
+                  bits: 0,
+                  total_bits: 0,
+                  bits_events: 0,
+                  cp_reward: 0,
+                  total_events: 0
+                };
+              }
+              this.stats[date].total_events += 1;
+
+              if (event.listener == "OnSEDonation" || event.listener == "OnSLDonationNoSync") {
+                //console.log("OnSEDonation", event.event);
+                var amount = parseInt(event.event.amount);
+                this.stats[date].donation += 1;
+                this.stats[date].total_donation += amount || 0;
+                this.stats[date].total += amount || 0;
+              }
+              if (event.listener == "OnSLTwitchSubNoSync") {
+                //console.log("OnSLTwitchSubNoSync", event.event);
+                this.stats[date].sub += 1;
+                let amount = this.getSubPlanAmount(parseInt(event.event.data.sub_plan) / 1000);
+                this.stats[date].total_sub += amount;
+                this.stats[date].total += amount;
+              }
+              if (event.listener == "OnSLTwitchGiftSubNoSync") {
+                //console.log("OnSLTwitchGiftSubNoSync", event.event);
+                let amount = this.getSubPlanAmount(parseInt(event.event.data.sub_plan) / 1000);
+                this.stats[date].sub += 1;
+                this.stats[date].total_sub += amount;
+                this.stats[date].total += amount;
+              }
+              if (event.listener == "OnSLTwitchBitsNoSync") {
+                // console.log("OnSLTwitchBitsNoSync", event.event);
+                var amount = this.getBitsAmount(event.event.amount);
+                this.stats[date].bits += parseInt(event.event.amount);
+                this.stats[date].total_bits += amount;
+                this.stats[date].total += amount;
+                this.stats[date].bits_events += 1;
+              }
+              if (event.listener == "OnChannelPoint") {
+                //console.log("OnChannelPoint", event.event);
+                this.stats[date].cp_reward += 1;
+              }
             }
           }
         }
@@ -340,6 +372,9 @@
           this.allTimeStats.total_sub += entrie.total_sub;
           this.allTimeStats.bits += entrie.bits;
           this.allTimeStats.total_bits += entrie.total_bits;
+          this.allTimeStats.bits_events += entrie.bits_events;
+          this.allTimeStats.total_events += entrie.total_events;
+          this.allTimeStats.cp_reward += entrie.cp_reward;
         }
         console.log('STATS', this.stats);
         console.log('ALL TIME STATS', this.allTimeStats);
@@ -462,6 +497,10 @@
       padding: 10px 0;
     }
 
+    .activity-item .content {
+      margin-bottom: 0;
+    }
+
   .content {
     text-overflow: ellipsis;
     overflow: hidden;
@@ -478,7 +517,7 @@
   }
 
   .stats-block {
-    max-height: 350px;
+    max-height: 330px;
     overflow-y: auto;
   }
 </style>
