@@ -34,7 +34,7 @@
                   {{item.event.data.amount}} €
                 </p>
                 <p class="content is-small">{{item.event.data.message}}</p>
-                <span class="tag">{{item.createdAt.$date}}</span>
+                <span class="tag">{{item.createdAt}}</span>
               </div>
               <div class="" v-else-if="item.listener == 'OnSLDonationNoSync'">
                 <p>
@@ -43,7 +43,7 @@
                   {{item.event.formatted}}
                 </p>
                 <p class="content is-small">{{item.event.message}}</p>
-                <span class="tag">{{item.createdAt.$date}}</span>
+                <span class="tag">{{item.createdAt}}</span>
               </div>
               <div class="" v-else-if="item.listener == 'OnSLTwitchSubNoSync'">
                 <p>
@@ -51,14 +51,14 @@
                   s'est abonné : {{item.event.tier}}
                 </p>
                 <p class="content is-small">{{item.event.message}}</p>
-                <span class="tag">{{item.createdAt.$date}}</span>
+                <span class="tag">{{item.createdAt}}</span>
               </div>
               <div class="" v-else-if="item.listener == 'OnSLTwitchGiftSubNoSync'">
                 <p>
                   {{item.event.gifter}}
                   offre un abonnement {{item.event.tier}} à : {{item.event.user}}
                 </p>
-                <span class="tag">{{item.createdAt.$date}}</span>
+                <span class="tag">{{item.createdAt}}</span>
               </div>
               <div class="" v-else-if="item.listener == 'OnSLTwitchBitsNoSync'">
                 <p>
@@ -66,7 +66,7 @@
                   a donné : {{item.event.amount}} bits
                 </p>
                 <p class="content is-small">{{item.event.message}}</p>
-                <span class="tag">{{item.createdAt.$date}}</span>
+                <span class="tag">{{item.createdAt}}</span>
               </div>
               <div v-else>
                 {{item.listener}}
@@ -307,8 +307,8 @@
         };
         for (const key in obj) {
           let event = obj[key];
-          if (event.createdAt && event.createdAt.$date) {
-            let date = event.createdAt.$date.split('T')[0];
+          if (event.createdAt) {
+            let date = event.createdAt.split('T')[0];
             if (new Date(date) >= new Date("2020-09-17")) {
               if (!this.stats[date]) {
                 this.stats[date] = {
