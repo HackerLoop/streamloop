@@ -158,8 +158,8 @@ class StreamlabsHandler extends Handler {
   getDonationParameters(message) {
     return {
       'data': message,
-      'amount': message.payload ? message.payload.amount : message.amount,
-      'formatted': message.payload ? message.payload.formatted_amount : message.formatted_amount,
+      'amount': message.payload ? message.payload.amount || message.amount : message.amount,
+      'formatted': message.payload ? message.payload.formatted_amount || message.formatted_amount : message.formatted_amount,
       'message': message.message,
       'user': message.name
     }

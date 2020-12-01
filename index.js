@@ -166,7 +166,7 @@ if (parserStreamlabs) {
       if (msg.user == process.env.TWITCH_USER && !msg.data.isTest) {
         return false;
       }
-      var test = msg.data.isTest;
+      var test = msg.data.isTest || msg.data.repeat;
 
       if (!test) {
         var newEvent = {
@@ -201,7 +201,7 @@ if (parserStreamlabs) {
       if (msg.user == process.env.TWITCH_USER && !msg.data.isTest) {
         return false;
       }
-      var test = msg.data.isTest;
+      var test = msg.data.isTest || msg.data.repeat;
 
       if (!test) {
         var newEvent = {
@@ -236,7 +236,7 @@ if (parserStreamlabs) {
       if (msg.user == process.env.TWITCH_USER && !msg.data.isTest) {
         return false;
       }
-      var test = msg.data.isTest;
+      var test = msg.data.isTest || msg.data.repeat;
 
       if (!test) {
         var newEvent = {
@@ -291,7 +291,7 @@ if (parserStreamlabs) {
       if (msg.gifter == process.env.TWITCH_USER && !msg.data.isTest) {
         return false;
       }
-      var test = msg.data.isTest;
+      var test = msg.data.isTest || msg.data.repeat;
 
       if (!test) {
         var newEvent = {
